@@ -1,0 +1,42 @@
+Step 1: Understand PCF APIs
+Study 3GPP spec TS 29.512 and TS 23.503 (Policy Control Function services).
+
+Step 2: Set Up the Tech Stack
+
+Recommended:
+Language: Go or Python (Go preferred in telecom)
+Framework: Gin (Go) or FastAPI (Python)
+API: Implement key Npcf_SMPolicyControl endpoints
+HTTP/2 Server with TLS support (simulates real 5GC transport)
+Optional: Use Docker for containerization
+
+Step 3: Implement Endpoints
+Example: /npcf-smpolicycontrol/v1/sm-policies/:id
+
+// Go + Gin example
+r.POST("/npcf-smpolicycontrol/v1/sm-policies/:id", func(c *gin.Context) {
+    id := c.Param("id")
+    var req map[string]interface{}
+    if err := c.BindJSON(&req); err != nil {
+        c.JSON(400, gin.H{"error": "invalid request"})
+        return
+    }
+
+    // Simulate decision logic
+    c.JSON(200, gin.H{
+        "policyId": id,
+        "decision": "allow",
+        "qos": "gold",
+        "resource": "5G-slice1",
+    })
+})
+Step 4: Add Logging and Config
+Log requests/responses
+Read config from JSON/YAML for mock rules
+
+Step 5: Package and Document
+
+Create a README
+Write example curl/postman commands
+Create Dockerfile (optional)
+

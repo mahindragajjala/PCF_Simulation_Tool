@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Policy Association Request</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Policy Association Request</h1>
+    <form action="http://localhost:8080/policy" method="POST">
+      <label>Notification URI:</label>
+      <input type="text" name="notificationUri" required />
+
+      <label>Alt IPv4 Addresses (comma separated):</label>
+      <input type="text" name="altNotifIpv4Addrs" />
+
+      <label>Alt IPv6 Addresses (comma separated):</label>
+      <input type="text" name="altNotifIpv6Addrs" />
+
+      <label>SUPI:</label>
+      <input type="text" name="supi" required />
+
+      <label>GPSI:</label>
+      <input type="text" name="gpsi" />
+
+      <label>Access Type:</label>
+      <select name="accessType">
+        <option value="3GPP_ACCESS">3GPP_ACCESS</option>
+        <option value="NON_3GPP_ACCESS">NON_3GPP_ACCESS</option>
+      </select>
+
+      <label>PEI:</label>
+      <input type="text" name="pei" />
+
+      <h3>User Location</h3>
+      <label>UE Location (lat,lon):</label>
+      <input type="text" name="userLoc.ueLocation" />
+
+      <label>TAI - MCC:</label>
+      <input type="text" name="userLoc.tai.plmnId.mcc" />
+      <label>TAI - MNC:</label>
+      <input type="text" name="userLoc.tai.plmnId.mnc" />
+      <label>TAI - TAC:</label>
+      <input type="text" name="userLoc.tai.tac" />
+
+      <label>Time Zone:</label>
+      <input type="text" name="timeZone" />
+
+      <label>Serving PLMN - MCC:</label>
+      <input type="text" name="servingPlmn.mcc" />
+      <label>Serving PLMN - MNC:</label>
+      <input type="text" name="servingPlmn.mnc" />
+
+      <label>RAT Type:</label>
+      <select name="ratType">
+        <option value="NR">NR</option>
+        <option value="EUTRA">EUTRA</option>
+        <option value="UTRA">UTRA</option>
+        <option value="GERAN">GERAN</option>
+        <option value="WLAN">WLAN</option>
+        <option value="VIRTUAL">VIRTUAL</option>
+      </select>
+
+      <label>Group IDs (comma separated):</label>
+      <input type="text" name="groupIds" />
+
+      <h3>Service Area Restriction</h3>
+      <label>Restriction Type:</label>
+      <input type="text" name="servAreaRes.restrictionType" />
+      <label>Areas (comma separated):</label>
+      <input type="text" name="servAreaRes.areas" />
+
+      <label>RFSP:</label>
+      <input type="number" name="rfsp" />
+
+      <h3>GUAMI</h3>
+      <label>GUAMI - MCC:</label>
+      <input type="text" name="guami.plmnId.mcc" />
+      <label>GUAMI - MNC:</label>
+      <input type="text" name="guami.plmnId.mnc" />
+      <label>AMF ID:</label>
+      <input type="text" name="guami.amfId" />
+
+      <label>Service Name:</label>
+      <input type="text" name="serviveName" />
+
+      <h3>Trace Data</h3>
+      <label>Trace Ref:</label>
+      <input type="text" name="traceReq.traceRef" />
+      <label>Trace Depth:</label>
+      <input type="text" name="traceReq.traceDepth" />
+      <label>NE Type List:</label>
+      <input type="text" name="traceReq.neTypeList" />
+      <label>Event List (comma separated):</label>
+      <input type="text" name="traceReq.eventList" />
+      <label>Collection Entity:</label>
+      <input type="text" name="traceReq.collectionEntity" />
+
+      <label>Supported Features:</label>
+      <input type="text" name="suppFeat" />
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</body>
+</html>
