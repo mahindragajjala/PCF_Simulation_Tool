@@ -1,0 +1,81 @@
+A real-time example of the Policy Association ID in a 
+5G network can be explained using a scenario 
+where a user is consuming both standard mobile data and 
+video streaming services simultaneously.
+
+Scenario:
+Let’s say a 5G mobile user is using their device for two different types of services:
+Browsing the internet (standard data usage)
+Streaming a high-definition (HD) video (high bandwidth and low latency requirements)
+
+
+Step-by-Step Example:
+Session Setup:
+When the user connects to the 5G network, the AMF (Access and Mobility Management Function) 
+initiates the process of establishing a session.
+The SMF (Session Management Function) creates the session, and the PCF (Policy Control Function) 
+is involved to apply relevant policies to control network usage and resources.
+
+
+Assigning Policy Rules:
+The PCF retrieves different policies based on the service the user is accessing. For example:
+For standard data usage, the network might assign a lower QoS (Quality of Service) 
+profile with average speed.
+For video streaming, the network might assign a higher QoS with low latency and higher bandwidth.
+
+
+Policy Association ID:
+The PCF generates a Policy Association ID for each type of service that the user 
+is using. Let’s assume:
+The Policy Association ID 1 is for the browsing session, which has standard QoS.
+The Policy Association ID 2 is for the video streaming session, which has higher QoS and priority.
+
+
+Session Management:
+Each Policy Association ID links the policies to the respective service flows. 
+The SMF uses these Policy Association IDs to apply the appropriate policies 
+when managing the user’s data traffic:
+For traffic linked to Policy Association ID 1, it enforces the standard data policy.
+For traffic linked to Policy Association ID 2, it applies the video streaming policy, 
+ensuring higher bandwidth and low latency.
+
+Dynamic Policy Changes:
+Let’s say the user starts downloading a large file. 
+In real-time, the PCF may dynamically adjust the policy for the 
+video streaming session (Policy Association ID 2) to reduce bandwidth 
+if the network becomes congested.
+Similarly, if the user switches from HD to SD video streaming, the PCF might lower
+the QoS requirements for the streaming session (adjusting Policy Association ID 2), 
+while possibly increasing the QoS for the file download (Policy Association ID 1).
+
+
+Charging and Billing:
+The Policy Association IDs also play a role in tracking the usage of each service for charging purposes. 
+The network can accurately monitor and charge for different types of services, such as:
+Standard browsing data (lower cost).
+High-definition video streaming (higher cost due to higher bandwidth and QoS requirements).
+
+
+Benefits of Policy Association ID:
+                            Granular Control: The Policy Association ID allows the network to 
+                            apply specific policies to different services (browsing vs. v
+                            ideo streaming), ensuring that each service gets the right 
+                            level of resources and treatment.
+
+
+Flexibility: 
+            The system can dynamically adjust policies based on real-time network conditions 
+            (e.g., congestion, network priority).
+
+
+Efficient Resource Management: 
+            By using distinct IDs for different services, the network can ensure optimal resource 
+            allocation and manage traffic flows more efficiently.
+
+
+Conclusion:
+In this scenario, the Policy Association ID enables the network to differentiate 
+between the user's browsing and video streaming activities, applying the appropriate 
+policies and resources for each. It helps in managing traffic, ensuring a high-quality 
+experience for services like video streaming while optimizing the network for standard data usage.
+
