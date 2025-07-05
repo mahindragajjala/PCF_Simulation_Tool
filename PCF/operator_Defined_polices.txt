@@ -1,0 +1,53 @@
+1. Access Network Selection Policies (ANDSP):
+    Determines which access network (e.g., 4G, 5G, Wi-Fi) 
+    the UE should use based on operator preferences and 
+    network conditions.
+
+
+2. Policy and Charging Rules (PCR):
+      Enforced by the Policy Control Function (PCF) to manage QoS 
+      (Quality of Service) and charging for specific traffic flows.
+
+3. Network Slicing Policies:
+Assign users to specific network slices (e.g., enhanced mobile 
+broadband, ultra-reliable low-latency communication, or massive IoT)
+based on their needs and operator-defined SLAs (Service Level 
+Agreements).
+
+4. Roaming Policies:
+Define access and restrictions for users roaming on other operators' 
+networks, including handling of preferred roaming partners and 
+access technologies.
+
+5. Traffic Steering Policies:
+  Directs traffic to specific paths or networks (e.g., 5G NR or Wi-Fi) 
+  to optimize performance or reduce costs.
+
+6. Idle Mode Mobility Policies:
+      Specifies criteria for UE mobility when in idle mode (e.g., 
+      deciding when to hand over between cells or RATs).
+
+7. QoS Management Policies:
+    Define the priority, latency, and bandwidth requirements for 
+    specific services or applications, ensuring an optimal user 
+    experience.
+
+8. Offloading Policies:
+  Enables traffic offloading to unlicensed spectrum (e.g., Wi-Fi) to 
+  reduce congestion on licensed 5G networks.
+
+9. Application-Specific Policies:
+  Policies tailored for specific applications, such as AR/VR, video 
+  streaming, or gaming, to ensure appropriate latency and bandwidth.
+
+10. Security and Access Control Policies:
+  Defines authentication, encryption, and other security measures for
+  accessing the 5G network.
+
+11. Power Saving Policies:
+      Includes UE power-saving modes and network configurations to 
+      optimize battery life while maintaining connectivity.
+
+12. Data Usage and Throttling Policies:
+    Controls data consumption by applying caps or throttling speeds 
+    after usage thresholds are reached.
