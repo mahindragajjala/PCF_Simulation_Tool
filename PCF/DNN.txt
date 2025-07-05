@@ -1,0 +1,5 @@
+DNN stands for "Data Network Name." 
+It is a key concept in 5G network slicing, which allows the creation of multiple virtual networks (slices) on top of a shared physical infrastructure. 
+Each slice can have its own unique characteristics, such as different quality of service (QoS), security policies, and network functions. 
+The DNN is used to identify and distinguish between these network slices, enabling the 5G core network to properly route and manage traffic based on the requirements of each slice.
+
