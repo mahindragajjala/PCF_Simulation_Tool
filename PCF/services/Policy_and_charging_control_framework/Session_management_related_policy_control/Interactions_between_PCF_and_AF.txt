@@ -1,0 +1,140 @@
+https://docs.google.com/document/d/1BN-dj4YY_EDEj79fe3n2X7xPoet1bYWawzdr_uxGf0E/edit?tab=t.6q88fi5afvl9
+
+Interactions between PCF and AF 
+
+
+Npcf and Naf enable transport of application level session information and Ethernet port management information from AF to PCF. 
+Application Level Session Information (ALSI) in 5G refers to session-specific data about an application (e.g., QoS, bandwidth, latency needs) that helps the network optimize performance, resource allocation, and policy enforcement.
+Such information includes, but is not limited to:
+- IP filter information or Ethernet packet filter information to identify the service data flow for policy control and/or differentiated charging;
+- Media/application bandwidth requirements for QoS control;
+- In addition, for sponsored data connectivity:
+- the sponsor's identification;
+- optionally, a usage threshold and whether the PCF reports these events to the AF;
+- information identifying the application service provider and application (e.g. SDFs, application identifier,etc.);
+- information required to enable Application Function influence on traffic routing as defined in clause 5.6.7 of TS 23.501 [2];
+- information required to enable setting up an AF session with required QoS as defined in clause 6.1.3.22.
+- information required to enable setting up an AF session with support for Time Sensitive Networking (TSN) as defined in clause 6.1.3.23.
+
+Npcf and Naf enable the AF subscription to notifications on PDU Session events, i.e. the events requested by the AF as described in clause 6.1.3.18 and the change of DNAI as defined in clause 5.6.7 of TS 23.501 [2].
+The N5 reference point is defined for the interactions between PCF and AF in the reference point representation. 
+
+
+Interactions between PCF and SMF
+
+
+Npcf and Nsmf enable the PCF to have dynamic control over the policy and charging behaviour at a SMF.
+Npcf and Nsmf enable the signalling of policy and charging control decisions and support the following functionality:
+- Creation of a SM Policy Association as defined in clause 4.16 of TS 23.502 [3];
+- Request for policy and charging control decision from the SMF to the PCF when a Policy Control Request Trigger related to Session Management has been met;
+- Provision of policy and charging control decision from the PCF to the SMF;
+- Deletion of a SM Policy Association as defined in clause 4.16 of TS 23.502 [3].
+- The N7 reference point is defined for the interactions between PCF and SMF in the reference point representation. 
+
+Interactions between PCF and AMF
+
+
+
+Npcf and Namf enable the PCF to provide Access and Mobility Management related policies to the AMF and support
+the following functionality:
+- Creation of an AM Policy Association as defined in clause 4.16 of TS 23.502 [3];
+- Request for access and mobility management related policies from the AMF to the PCF when a Policy Control Request Trigger related to Access and Mobility Management has been met;
+- Provision of access and mobility management decision from the PCF to the AMF;
+- Deletion of an AM Policy Association as defined in clause 4.16 of TS 23.502 [3]; 
+- Creation of an UE Policy Association as defined in clause 4.16 of TS 23.502 [3];
+- Notification of changes to the PCF when a Policy Control Request Trigger related to UE access selection and PDU Session selection has been met;
+- Request for DNN replacement from the AMF to the PCF when a Policy Control Request Trigger related to SMF selection management has been met;
+- Provision of DNN replacement decision from the PCF to the AMF;
+- Deletion of an UE Policy Association as defined in clause 4.16 of TS 23.502 [3];
+- Handling of transparent delivery UE access selection and PDU Session selection policy from PCF to the UE via the AMF.
+
+The N15 reference point is defined for the interactions between PCF and AMF in the reference point representation. 
+
+Interactions between V-PCF and H-PCF
+
+For roaming scenario, the interactions between V-PCF and H-PCF through Npcf enables:
+- Creation of an UE Policy Association as defined in clause 4.16 of TS 23.502 [3];
+- Relay of notification of changes from the V-PCF in the VPLMN to the H-PCF as defined in clause 4.16 of TS 23.502 [3];
+- Provision of UE access selection and PDU Session selection related policies to the V-PCF in the VPLMN;
+- Deletion of an UE Policy Association as defined in clause 4.16 of TS 23.502 [3].
+The N24 reference point is defined for the interactions between V-PCF and H-PCF in the reference point representation.
+
+
+Interactions between PCF and UDR
+
+
+The Nudr enables the PCF to access policy control related subscription information and application specific information stored in the UDR. 
+
+The Nudr interface supports the following functions:
+
+- Request for policy control related subscription information and application specific information from the UDR.
+
+- Provisioning of policy control related subscription information and application specific information to the UDR.
+
+- Notifications from the UDR on changes in the policy control related subscription information.
+
+- Subscription to the UDR for the AF requests targeting a DNN and S-NSSAI or a group of UEs (roaming UEs for LBO case) identified by an Internal Group Identifier.
+
+- Notifications from the UDR on the update of AF requests targeting a DNN and S-NSSAI or a group of UEs (roaming UEs for LBO case) identified by an Internal Group Identifier.
+- The N36 reference point is defined for the interactions between PCF and UDR in the reference point representation.
+
+Interactions between SMF and CHF
+
+The interactions between SMF and CHF enable online and offline charging.
+The N40 reference point is defined for the interactions between SMF and CHF in the reference point representation.
+Since the N40 reference point resides between the SMF and CHF in the HPLMN, home routed roaming and non-roaming scenarios are supported in the same manner.
+NOTE: The functionality of this interface/reference point is defined in TS 32.240 [8].
+
+Interactions between PCF and CHF
+
+The Nchf enables the PCF to access policy counter status information relating to subscriber spending from CHF and support the following functionality:
+
+- Request for reporting of policy counter status information from PCF to CHF and subscribe to or unsubscribe from spending limit reports (i.e. notifications of policy counter status changes);
+- Report of policy counter status information upon a PCF request from CHF to PCF;
+- Notification of spending limit reports from CHF to PCF;
+- Cancellation of spending limit reporting from PCF to CHF.
+The N28 reference point is defined for the interactions between PCF and CHF in the reference point representation.
+Since the N28 reference point resides between the PCF and CHF in the HPLMN, home routed roaming and non-roaming scenarios are supported in the same manner.
+
+NOTE: In this Release of the specification, there is no support by the Nchf_SpendingLimitControl service between the PCF in VPLMN and the CHF in the HPLMN.
+
+
+Interactions between SMF and NEF
+
+Nsmf and Nnef enable transport of PFDs(Packet Flow Description) from the NEF (PFDF) to the SMF for a particular Application Identifier or for a set of Application Identifiers. 
+
+It is achieved with the support of the following functionality:
+
+- Creation, updating and removal of individual or the whole set of PFDs from the NEF (PFDF) to the SMF;
+- Confirmation of creation, updating and removal of PFDs from the SMF to the NEF (PFDF).
+
+NOTE: The interactions between the SMF and the NEF (PFDF) for transporting PFDs are not related to any PDU Session.
+
+The N29 reference point is defined for the interactions between SMF and NEF (PFDF) in the reference point representation.
+
+Interactions between NEF and PCF
+
+The NEF (Network Exposure Function) in 5G enables secure and controlled exposure of network services and capabilities to external applications and third-party systems.
+Npcf and Nnef enable the negotiation(చర్చలు) of policy and charging control behavior between PCF and NEF by supporting the following functionality:
+- service specific policy and charging control;
+- sponsor data connectivity including usage monitoring;
+- AF-influenced traffic steering authorization;
+- subscription and reporting of events for the event exposure;
+- Negotiations for future background data transfer.
+The N30 reference point is defined for the interactions between PCF and NEF in the reference point representation.
+
+	 Interactions between NWDAF and PCF 
+
+The Nnwdaf enables the PCF to subscribe to and be notified on slice load level analytics. 
+
+The following information are notified by the NWDAF:
+
+- Identifier of network slice instance;
+- Load level information of network slice instance.
+
+NOTE: How this information is used by the PCF is not standardized in this release of the specification.
+
+The Nnwdaf enables the PCF to request or subscribe to and be notified on observed service experience (i.e. the average observed Service MoS) as described in clause 6.4 of TS 23.288 [24].
+The Nnwdaf enables the PCF to request or subscribe to and be notified on network performance as described in clause 6.6 of TS 23.288 [24].
+The Nnwdaf enables the PCF to request or subscribe to and be notified on UE related analytics as described in clause 6.7 of TS 23.288 [24].
+The N23 reference point is defined for the interactions between NWDAF and PCF in the reference point representation.
