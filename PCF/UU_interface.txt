@@ -1,0 +1,33 @@
+https://docs.google.com/document/d/1BN-dj4YY_EDEj79fe3n2X7xPoet1bYWawzdr_uxGf0E/edit?tab=t.4gvcpgfnd8cf
+
+The interface between the UE (User Equipment) and the RAN (Radio Access Network) or gNB in 5G is called the Uu interface.
+
+Uu Interface
+Definition: The Uu interface is the air interface, also referred to as the radio interface, that enables communication between the UE and the gNB in 5G.
+Protocol Stack: It involves both the control plane and the user plane, and its protocol layers include:
+Physical Layer (PHY): Handles radio signal transmission and reception.
+MAC (Medium Access Control): Manages data transfer and resource allocation.
+RLC (Radio Link Control): Provides segmentation, retransmission, and error correction.
+PDCP (Packet Data Convergence Protocol): Handles IP packet compression, encryption, and integrity protection.
+NAS (Non-Access Stratum): Contains signaling messages passed directly between the UE and the AMF (via the gNB).
+
+Key Functions of the Uu Interface
+Control Plane Communication:
+
+
+Transfers signaling messages (e.g., registration, mobility management) between the UE and the gNB (relayed to the AMF).
+User Plane Communication:
+
+
+Handles user data traffic, such as internet browsing, video streaming, or voice calls.
+Mobility Support:
+
+
+Facilitates handovers and ensures a seamless transition as the UE moves between different gNBs.
+QoS Management:
+
+
+Supports Quality of Service parameters for different applications.
+
+Would you like more details about the protocol layers or the functioning of the Uu interface?
+
