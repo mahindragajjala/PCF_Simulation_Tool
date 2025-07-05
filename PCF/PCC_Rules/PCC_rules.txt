@@ -1,0 +1,123 @@
+TS 129 212
+Policy and Charging Control (PCC) apply dynamic policy control based on various factors such as UE type, Subscription type, Network congestion, Service requirements, etc.
+It enables various charging mechanisms like Usage-based charging, Slice-based charging, Rule-based charging, etc.
+
+
+DYNAMIC POLICY CONTROL
+Dynamic policy control in 5G uses the 5G Policy Control Function (PCF) to apply policy rules based on various factors in real time.
+The PCF is a central component of 5G's Service-based Architecture (SBA) and manages network resources across radio, devices, and the core network. 
+It's an evolution of the 4G Policy and Charging Rules Function (PCRF) with more agility and flexibility.
+Through PCC architecture, Service Providers define the management and monetization of network resources as it ensures fair resource utilization, efficient service delivery, and flexible charging models. 
+Policy and Charging Control (PCC) architecture in 5G networks is a critical element for applications such as Voice over New Radio, network slicing, and Multi access Edge Computing (MEC). 
+PCC architecture defines policy rules based on services and subscriptions, activates them on the network, monitors service usage, enforces policy rules, and handles AAA and credit control.
+
+
+
+The purpose of the PCC rule is to: 
+Detect a packet belonging to a service data flow. 
+The service data flow templates within the PCC rule are used for the selection of downlink IP CAN bearers. 
+The service data flow filters within the PCC rule are used for the enforcement that uplink IP flows are transported in the correct IP CAN bearer.
+SERVICE DATA FLOW 
++-------------------+
+|   Incoming IP     |
+|     Packets       |
++-------------------+
+          |
+          v
++-------------------+
+|   Packet Filters   |
+|  (SDF Templates)  |
++-------------------+
+          |
+          v
++-------------------+
+|   Match Incoming   |
+|   Packets to      |
+|   Filters         |
++-------------------+
+          |
+          v
++-------------------+
+|   Filter Match?   |
++-------------------+
+          |
+      +---+---+
+      |       |
+     Yes      No
+      |       |
+      v       v
++-------------------+   +-------------------+
+|   Open Gate?      |   |   Drop Packet     |
++-------------------+   +-------------------+
+      |       |
+  +---+---+   |
+  |       |   |
+ Yes      No  |
+  |       |   |
+  v       v   |
++-------------------+   +-------------------+
+|   Forward Packet   |   |   Apply Default    |
+|   to Destination   |   |   Handling         |
++-------------------+   +-------------------++-------------------+
+|   Incoming IP     |
+|     Packets       |
++-------------------+
+          |
+          v
++-------------------+
+|   Packet Filters   |
+|  (SDF Templates)  |
++-------------------+
+          |
+          v
++-------------------+
+|   Match Incoming   |
+|   Packets to      |
+|   Filters         |
++-------------------+
+          |
+          v
++-------------------+
+|   Filter Match?   |
++-------------------+
+          |
+      +---+---+
+      |       |
+     Yes      No
+      |       |
+      v       v
++-------------------+   +-------------------+
+|   Open Gate?      |   |   Drop Packet     |
++-------------------+   +-------------------+
+      |       |
+  +---+---+   |
+  |       |   |
+ Yes      No  |
+  |       |   |
+  v       v   |
++-------------------+   +-------------------+
+|   Forward Packet   |   |   Apply Default    |
+|   to Destination   |   |   Handling         |
++-------------------+   +-------------------+
+
+The Serving Gateway (S-GW) is a key component in the Evolved Packet Core (EPC) architecture of 4G LTE networks. Its primary functions include:
+Routing and forwarding user data packets between the LTE radio access network (eNodeB) and external packet data networks
+Handling mobility management, particularly during handovers to ensure continuity of data sessions
+Allocating IP addresses to user equipment (UEs) as they connect to the network
+Managing bearers and ensuring proper QoS for each bearer
+Providing charging-related information to the charging system
+the User Plane Function (UPF) is the similar component that takes over most of the S-GW's functionalities. The UPF is responsible for:
+Terminating the N3 interface from the base station (gNB)
+Forwarding user plane traffic between the UE and external networks
+Performing packet routing and forwarding
+Handling packet inspection and QoS enforcement
+Allocating IP addresses to UEs
+Providing charging information
+
+
+IP-CAN (IP Connectivity Access Network) bearer is used to provide IP connectivity and quality of service (QoS) for user traffic in mobile networks like 4G and 5G.
+
+The PCEF shall check each received packet against the service data flow filters of each PCC rule in the order of the precedence of the PCC rules. 
+When a packet matches a service data flow filter, the packet matching process for that packet is completed, and the corresponding PCC rule shall be applied.
+For PCC rules that contain an application identifier referencing an application detection filter, the precedence is only relevant for the rule enforcement, i.e. when the detected application packet matches multiple PCC rules, only the enforcement, reporting of application starts and stops, usage monitoring, and charging actions of the PCC rule with the highest precedence shall be applied. 
+
