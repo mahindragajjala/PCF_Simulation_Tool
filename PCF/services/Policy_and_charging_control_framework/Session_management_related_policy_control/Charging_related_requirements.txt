@@ -1,0 +1,99 @@
+https://docs.google.com/document/d/1BN-dj4YY_EDEj79fe3n2X7xPoet1bYWawzdr_uxGf0E/edit?tab=t.w9o82hsxjo9q
+
+Charging related requirements
+
+In order to allow for charging control on service data flow, the information in the PCC rule identifies the service data flow and specifies the parameters for charging control.
+For the purpose of charging correlation between service data flow level and application level (e.g. IMS) as well as online charging support at the application level, applicable charging identifiers and Access Type identifiers shall be passed from the PCF to the AF, if such identifiers are available. 
+
+
+
+Charging models 
+
+The PCC charging shall support the following charging models for charging performed by SMF:
+- Volume based charging;
+- Time based charging;
+- Volume and time based charging;
+- Event based charging;
+- No charging.
+
+NOTE: The charging model - "No charging" implies that charging control is not applicable, and no charging records are generated. 
+
+
+Charging requirements
+It shall be possible to apply different rates and charging models depending on a UE's roaming status.
+It shall be possible to apply different rates based on the location of a UE.
+It shall be possible to apply different rates for specific part of a service, e.g. allow the UE to download a certain volume for one rate, and after this volume has been reached continue with a different rate.
+It shall be possible to apply different rates based on the time of day.
+It shall be possible to enforce per service data flow, identified by PCC Rule, usage limits on a per UE basis.
+It shall be possible to apply different rates depending on the access used to carry a Service Data Flow It shall be possible to apply an online charging action upon Application Start/Stop events.
+It shall be possible to indicate to the SMF that interactions with the CHF are not required for a PCC rule, i.e. to not perform accounting, credit control or recording of usage for the service data flow, in this case no charging information is generated. 
+
+
+
+
+	Different services in the networking
+HTTP/HTTPS (HyperText Transfer Protocol):
+Used for browsing websites (HTTP for unencrypted, HTTPS for encrypted).
+SMTP (Simple Mail Transfer Protocol):
+Used to send emails.
+POP3/IMAP (Post Office Protocol/Internet Message Access Protocol):
+Used for receiving and managing emails.
+DNS (Domain Name System):
+Resolves human-readable domain names (e.g., google.com) to IP addresses.
+DHCP (Dynamic Host Configuration Protocol):
+Automatically assigns IP addresses to devices in a network.
+SFTP (Secure File Transfer Protocol):
+A secure version of FTP, using SSH for encryption.
+TFTP (Trivial File Transfer Protocol):
+A simplified version of FTP for transferring small files without authentication.
+Telnet:
+Allows remote access to a device or server via command-line (insecure).
+SSH (Secure Shell):
+Secure remote access to servers and devices.
+NTP (Network Time Protocol):
+Synchronizes clocks between systems in a network.
+SNMP (Simple Network Management Protocol):
+Manages and monitors network devices like routers and switches.
+RDP (Remote Desktop Protocol):
+Enables remote desktop access to a Windows machine.
+VOIP (Voice over Internet Protocol):
+Supports voice calls over the internet (e.g., Skype).
+VPN (Virtual Private Network):
+	Creates a secure connection to a private network over the internet.
+ICMP (Internet Control Message Protocol):
+Used for error reporting and diagnostics (e.g., Ping command).
+LDAP (Lightweight Directory Access Protocol):
+
+
+Accesses and manages directory services like Active Directory.
+
+			Examples of Service Data Flow Charging
+
+There are many different services that may be used within a network, including both user-user and user-network services. 
+Service data flows from these services may be identified and charged in many different ways. 
+A number of examples of configuring PCC rules for different service data flows are described below. 
+
+EXAMPLE 1: 
+
+A network server provides an FTP - file transfer protocol service. 
+The FTP server supports both the active (separate ports for control and data) and passive modes of operation.
+A PCC rule is configured for the service data flows associated with the FTP server for the user. 
+The PCC rule uses a filter specification for the uplink that identifies packets sent to port 20 or 21 of the IP address of the server, and the origination information is wildcarded. 
+In the downlink direction, the filter specification identifies packets sent from port 20 or 21 of the IP address of the server.
+
+Active FTP Mode: The server actively connects back to the client for data transfer. The client opens a listening port, and the server uses port 20 to initiate the data connection to the client.
+Passive FTP Mode: The server listens for connections on a random port for data transfer. The client initiates both the control (port 21) and data connections, making it more firewall-friendly.
+
+EXAMPLE 2: 
+
+A network server provides a "web" service. 
+A PCC rule is configured for the service data flows associated with the HTTP server for the user. 
+The PCC rule uses a filter specification for the uplink that identifies packets sent to port 80 of the IP address of the server, and the origination information is wildcarded. 
+In the downlink direction, the filter specification identifies packets sent from port 80 of the IP address of the server.
+
+EXAMPLE 3: 
+An operator has a specific charging rate for user-user VoIP traffic over the IMS. 
+A PCC rule is established for this service data flow. 
+The filter information to identify the specific service data flow for the user-user traffic is provided by the P-CSCF (AF). 
+
+
