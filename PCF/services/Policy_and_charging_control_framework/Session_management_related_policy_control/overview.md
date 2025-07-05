@@ -1,3 +1,5 @@
+https://docs.google.com/document/d/1BN-dj4YY_EDEj79fe3n2X7xPoet1bYWawzdr_uxGf0E/edit?tab=t.qlozecqx199m
+
 It shall be possible for the PCC framework to base decisions upon subscription information, Access Type and the RAT Type.
 
 The PCC framework shall perform Gating Control and discard packets that don't match any service data flow of the active PCC rules. 
