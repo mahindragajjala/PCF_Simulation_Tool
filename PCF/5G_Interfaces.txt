@@ -1,0 +1,66 @@
+
+N1: Reference point between the UE and the AMF.
+N2: Reference point between the (R)AN and the AMF.
+N3: Reference point between the (R)AN and the UPF.
+N4: Reference point between the SMF and the UPF.
+N6: Reference point between the UPF and a Data Network.
+N9: Reference point between two UPFs.
+N5: Reference point between the PCF and an AF.
+N7: Reference point between the SMF and the PCF.
+N8: Reference point between the UDM and the AMF.
+N10: Reference point between the UDM and the SMF.
+N11: Reference point between the AMF and the SMF.
+N12: Reference point between AMF and AUSF.
+N13: Reference point between the UDM and Authentication Server function the AUSF.
+N14: Reference point between two AMFs.
+N15: Reference point between the PCF and the AMF in the case of non-roaming scenario, PCF in the visited network and AMF in the case of roaming scenario.
+N16: Reference point between two SMFs, (in roaming case between SMF in the visited network and the SMF in the home network).
+N16a: Reference point between SMF and I-SMF.
+N17: Reference point between AMF and 5G-EIR.
+N18: Reference point between any NF and UDSF.
+N19: Reference point between two PSA UPFs for 5G LAN-type service.
+N22: Reference point between AMF and NSSF.
+N23: Reference point between PCF and NWDAF.
+N24: Reference point between the PCF in the visited network and the PCF in the home network.
+N26: Reference point between MME (4G) and AMF
+N27: Reference point between NRF in the visited network and the NRF in the home network.
+N28: Reference point between PCF and CHF.
+N29: Reference point between NEF and SMF.
+N30: Reference point between PCF and NEF.
+N31: Reference point between the NSSF in the visited network and the NSSF in the home network.
+N32: Reference point between SEPP in the visited network and the SEPP in the home network.
+N33: Reference point between NEF and AF.
+N34: Reference point between NSSF and NWDAF.
+N35: Reference point between UDM and UDR.
+N36: Reference point between PCF and UDR.
+N37: Reference point between NEF and UDR.
+N38: Reference point between I-SMFs.
+N40: Reference point between SMF and the CHF.
+N50: Reference point between AMF and the CBCF.
+N51: Reference point between AMF and NEF.
+N52: Reference point between NEF and UDM.
+N55: Reference point between AMF and the UCMF.
+N56: Reference point between NEF and the UCMF.
+N57: Reference point between AF and the UCMF.
+N41: Reference point between AMF and the CHF in HPLMN.
+N42: Reference
+N58: Reference point between AMF and the NSSAAF.
+N59: Reference point between UDM and the NSSAAF.
+
+N1 Interface: This interface connects the UE (User Equipment) to the gNB (5G New Radio Base Station) and is responsible for radio access communication.
+N2 Interface: The N2 interface connects the gNBs in a multi-gNB deployment scenario, allowing them to coordinate and exchange control information.
+N3 Interface: This interface connects the gNB to the UPF (User Plane Function) and is used for user plane data transport.
+N4 Interface: The N4 interface connects the SMF (Session Management Function) to the UPF and is used for control plane communication related to session management.
+N5 Interface: Policy Control Function (PCF) and an Application Function (AF)
+N6 Interface: This interface connects the SMF to the AMF (Access and Mobility Management Function) and is used for control plane communication related to access and mobility management.
+N7 Interface: The N7 interface connects the AMF to the UPF and is used for control plane communication between these functions.
+N8 Interface: This interface connects the SMF to the PCF (Policy Control Function) and is used for control plane communication related to policy control.
+N9 Interface: The N9 interface connects the SMF to the NRF (NF Repository Function) and is used for control plane communication related to network function discovery and selection.
+N10 Interface: The N10 interface connects the PCF to the UDM (Unified Data Management) and is used for control plane communication related to policy control and charging.
+N11 Interface: The N11 interface connects the PCF to the AF (Application Function) and is used for control plane communication related to application-based policy control.
+N12 Interface: The N12 interface connects the AMF to the EIR (Equipment Identity Register) and is used for checking the validity of the UE's identity.
+N13 Interface: The N13 interface connects the AMF to the OCS (Online Charging System) and is used for communication related to charging and billing.
+N14 Interface: The N14 interface connects the UPF to the PFCP (Packet Forwarding Control Protocol) entity and is used for control plane communication related to user plane resource allocation.
+N17 interface can emulate Equipment Identity Register (EIR), within the 5G Core Network offering services to Access and Mobility Management Function (AMF) via the service based N17 interface. 
+
+
