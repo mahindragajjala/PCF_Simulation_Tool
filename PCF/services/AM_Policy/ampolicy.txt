@@ -1,0 +1,46 @@
+Npcf_AMPolicyControl_Create service operation 
+
+
+Service operation name: Npcf_AMPolicyControl_Create 
+Description: NF Service Consumer can request the creation of an AM Policy Association and by providing relevant parameters about the UE context to the PCF. 
+
+Inputs, Required: 
+SUPI. 
+Inputs, Optional: Information provided by the AMF, such as 
+Access Type, 
+Permanent Equipment Identifier, 
+GPSI, 
+User Location Information, 
+UE Time Zone, 
+Serving Network identifier (PLMN ID, or PLMN ID and NID, see clause 5.34 of TS 23.501 [2]), RAT type, 
+List of subscribed Service Area Restrictions, 
+subscribed RFSP Index, 
+the Allowed NSSAI, 
+Target NSSAI, 
+GUAMI, 
+Subscribed UE-AMBR, 
+Internal Group (see clause 5.9.7 of TS 23.501 [2]), 
+subscription notification indication, 
+backup AMF(s) (if NF Type is AMF). 
+Backup AMF(s) are sent only once by the AMF to the PCF in its first interaction with the PCF, list of NWDAF instance Ids and corresponding Analytics ID(s). 
+
+
+Outputs, Required: AM Policy Association ID. 
+Outputs, Optional: The requested access and mobility related policy information as defined in clause 6.5 of TS 23.503 [20] and Policy Control Request Trigger(s) of AM Policy Association as defined in clause 6.1.2.5 of TS 23.503 [20]. 
+
+See clause 4.2.2.2.2 (step 16) for the detail usage of this service operation for AMF. 
+In step 16, the AMF requests the PCF to apply operator policies for the UE. 
+
+See clause 4.16.1.2 (steps 2 and 3) for the detail usage of this service operation for AMF. In step 2, the AMF requests the PCF to apply operator policies for the UE; in step 3, the PCF acknowledges AMF with requested policy.
+
+
+
+
+[Optional] new AMF performs an AM Policy Association Establishment/Modification. For an Emergency Registration, this step is skipped. 
+
+If the new AMF selects a new (V-)PCF in step 15, the new AMF performs AM Policy Association Establishment with the selected (V-)PCF as defined in clause 4.16.1.2. 
+
+If the (V-)PCF identified by the (V-)PCF ID included in UE context from the old AMF is used, the new AMF performs AM Policy Association Modification with the (V-)PCF as defined in clause 4.16.2.1.2. 
+
+If the AMF notifies the Mobility Restrictions (e.g. UE location) to the PCF for adjustment, or if the PCF updates the Mobility Restrictions itself due to some conditions (e.g. application in use, time and date), the PCF shall provide the updated Mobility Restrictions to the AMF. If the subscription information includes Tracing Requirements, the AMF provides the PCF with Tracing Requirements. If the AMF supports DNN replacement, the AMF provides the PCF with the Allowed NSSAI and, if available, the Mapping Of Allowed NSSAI. If the PCF supports DNN replacement, the PCF provides the AMF with triggers for DNN replacement.  
+
