@@ -1,0 +1,90 @@
+1. Registration Phase (UE and AMF)
+Step 1: 
+The UE (User Equipment) sends a Registration Request to the AMF 
+(Access and Mobility Management Function) via the RAN (Radio Access
+Network).
+This includes UE information like IMSI, supported features, and 
+subscription identifiers.
+
+
+Step 2: 
+The AMF authenticates the UE using the AUSF (Authentication Server 
+Function) and retrieves subscription details from the UDM (Unified 
+Data Management).
+
+Step 3: 
+The AMF confirms successful registration to the UE, completing the 
+registration process.
+Policy Role: Subscription-based policies are retrieved from the UDM 
+and passed to the PCF for further action.
+
+2. PDU Session Establishment (UE and SMF)
+Step 1: 
+The UE sends a PDU (Protocol Data Unit) Session Establishment 
+Request to the AMF to establish a data session (e.g., for internet 
+access).
+
+Step 2: 
+The AMF forwards this request to the SMF (Session Management
+Function).
+The SMF acts as the anchor for managing the PDU session. 
+It assigns an IP address to the UE and determines routing.
+  
+Policy Role: The SMF interacts with the PCF to retrieve policies 
+for the session, such as QoS parameters, traffic rules, and 
+charging policies.
+
+3. Policy Decision and Enforcement (PCF)
+Step 1: 
+The SMF sends a request to the PCF for policies related to the PDU
+session.
+This includes details like QoS requirements, application type, and 
+subscription tier.
+
+Step 2: The PCF generates a policy based on:
+Operator-defined rules
+Application type (e.g., streaming, gaming)
+UE capabilities (e.g., 5G NSA or SA mode)
+
+Step 3: 
+The PCF sends the policy rules back to the SMF for 
+enforcement.
+  
+4. Session Setup and Resource Allocation (RAN and UPF)
+Step 1: 
+The SMF communicates with the RAN and UPF (User Plane Function) to 
+allocate the necessary resources for the session.
+
+Step 2: 
+The UPF enforces traffic flow rules, QoS, and charging policies as 
+defined by the PCF.
+Policy Role: The UPF uses rules provided by the SMF and PCF to 
+handle traffic prioritization, bandwidth allocation, and routing.
+  
+5. Data Transmission (UE to Internet)
+Step 1: 
+The UE begins transmitting data packets to the internet via the RAN 
+and UPF.
+Step 2:
+The RAN ensures that the radio resources are allocated as per the 
+QoS policies.
+Step 3: 
+The UPF routes traffic to the internet and enforces policies 
+like throttling, traffic prioritization, and billing.
+  
+Simplified Call Flow Diagram
+UE ↔ RAN ↔ AMF ↔ SMF ↔ PCF ↔ UPF
+The key interactions include:
+Registration: UE ↔ AMF ↔ AUSF ↔ UDM
+PDU Session Setup: UE ↔ AMF ↔ SMF ↔ PCF
+Policy Enforcement: SMF ↔ PCF ↔ UPF ↔ RAN
+
+Policy Control Example Use Case
+For a video streaming app:
+The PCF defines a low latency, high bandwidth policy.
+The RAN prioritizes radio resources for the streaming session.
+The UPF applies traffic prioritization and enforces QoS policies.
+The SMF handles session continuity, ensuring the stream remains 
+uninterrupted during handovers.
+Let me know if you’d like a detailed explanation of any specific 
+phase or its implementation in 5G!
