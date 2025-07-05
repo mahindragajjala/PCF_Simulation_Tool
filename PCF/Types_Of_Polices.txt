@@ -1,0 +1,239 @@
+https://docs.google.com/document/d/1BN-dj4YY_EDEj79fe3n2X7xPoet1bYWawzdr_uxGf0E/edit?tab=t.8l67ytt0qfu1
+
+
+Ampolicy
+
+
+Access Control Policies:
+Determining which User Equipments (UEs) are allowed to access the network.
+Specifying conditions under which access is granted or denied.
+
+Different polices in the Access Control Policies .
+Authentication Policies: 
+Configuring authentication methods and algorithms used during the authentication and key agreement procedures.
+Defining parameters related to subscriber authentication.
+Authentication Algorithms:
+Configuring the specific algorithms used for authentication, such as the AKA (Authentication and Key Agreement) algorithm.
+Defining the cryptographic primitives and methods employed during the authentication process.
+TLS (Transport Layer Security):
+TLS is a widely used protocol for securing communication over a computer network.
+PCF may use TLS for secure communication with other network functions, ensuring the confidentiality and integrity of data exchanged.
+EAP (Extensible Authentication Protocol):
+EAP is an authentication framework that supports various authentication methods.
+In the context of PCF, EAP might be used for authentication and key agreement during the establishment of secure connections with user equipment (UE) or other network functions.
+AKA (Authentication and Key Agreement):
+AKA is a key agreement mechanism used in mobile networks, including 5G.
+PCF may engage in AKA procedures to authenticate and establish keys with the subscriber's SIM card, ensuring secure communication between the PCF and the UE.
+IKE (Internet Key Exchange):
+IKE is a protocol used to set up a security association (SA) in the IPsec protocol suite.
+PCF might use IKE to establish secure communication channels with other network functions, providing confidentiality and integrity.
+OAuth (Open Authorization):
+OAuth is an authorization framework that enables secure delegation of authentication without exposing user credentials.
+PCF may use OAuth for secure authorization and access control, particularly when interacting with external entities.
+Mutual TLS (mTLS):
+mTLS involves both parties in a communication mutually authenticating each other using TLS certificates.
+PCF may use mTLS for secure and authenticated communication with other network functions, ensuring the identity of communicating entities.
+Key Agreement Protocols in 5G Security Architecture:
+5G security architecture includes key agreement mechanisms specified in various security protocols such as EAP-AKA', EAP-TLS, and others.
+PCF may utilize these protocols to establish secure communication channels with other network functions and entities in the 5G network.
+
+Key Agreement Mechanisms:
+Configuring the mechanisms used for key agreement between the User Equipment (UE) and the network.
+Defining how the keys for securing communication channels are derived or negotiated.
+EAP-AKA' (Authentication and Key Agreement):
+Extensible Authentication Protocol for Authentication and Key Agreement is an extension of the EAP framework specifically designed for mobile networks.
+It is used for mutual authentication and key agreement between the User Equipment (UE) and the Authentication Server (AuSf).
+5G-AKA (5G Authentication and Key Agreement):
+5G-AKA is the authentication and key agreement protocol specifically designed for 5G networks.
+It involves the generation and exchange of Authentication Tokens (AUTN), Random Challenges (RAND), and other parameters between the UE and the 5G Authentication Server (AUSF).
+TLS (Transport Layer Security):
+TLS is a widely used protocol for securing communication over a computer network, including 5G networks.
+It provides a mechanism for entities to negotiate cryptographic parameters and establish a secure communication channel.
+IKE (Internet Key Exchange):
+IKE is commonly used in IPsec VPNs (Virtual Private Networks) to establish a secure channel between network entities.
+In 5G, IKE might be used for secure communication between network functions, such as the Policy Control Function (PCF) and the Access and Mobility Management Function (AMF).
+EAP-TLS (Transport Layer Security with EAP):
+EAP-TLS is an EAP method that uses the TLS protocol for key agreement.
+It involves mutual authentication using digital certificates, providing a secure way to establish keys.
+5G-SBA (Service-Based Architecture) Security:
+5G-SBA introduces a service-based architecture for 5G networks, and security mechanisms include key agreement for secure communication between network functions using security headers and protocols.
+NDS (Network Domain Security):
+Network Domain Security encompasses various security mechanisms in 5G, including key agreement protocols to secure communication within the network domain.
+HTTP/2 (Hypertext Transfer Protocol version 2):
+In some cases, HTTP/2 with secure communication using TLS may be used, especially in scenarios where HTTP/2 is employed for communication between entities.
+
+
+Security Key Length and Strength:
+Specifying the length and strength of security keys used during authentication.
+Configuring the level of security for key material.
+Subscriber Authentication Parameters:
+Configuring parameters related to subscriber authentication, such as the authentication management field (AMF) and the operator-specific constant (OPc).
+Defining how subscriber credentials are managed and processed during authentication.
+subscriber authentication involves the exchange of specific parameters between the User Equipment (UE) and the Authentication Server Function (AUSF). These parameters play a crucial role in ensuring the security of the authentication process.
+SUPI (Subscription Permanent Identifier):
+The SUPI is a unique identifier associated with a subscriber's subscription and is used during the authentication process.
+SUCI (Subscription Concealed Identifier):
+The SUCI is a concealed form of the SUPI, designed to protect the privacy of the subscriber during communication procedures.
+RAND (Random Challenge):
+RAND is a random value generated by the network and sent to the UE. It is used in the authentication process to ensure freshness and unpredictability.
+AUTN (Authentication Token):
+AUTN is an Authentication Token generated by the network. It includes various parameters such as RAND, XRES (Expected Response), and other information for authentication.
+XRES (Expected Response):
+XRES is the expected response from the UE, calculated based on the RAND and the Authentication Key (KASME). It is used to verify the authenticity of the UE.
+KASME (Key for Access to Security Management Entity):
+KASME is a key used for secure communication between the UE and the network. It is derived during the authentication process.
+AMF (Authentication Management Field):
+AMF is a field used in 5G authentication algorithms. It is sent to the UE along with the RAND and is an input parameter for key derivation.
+MAC (Message Authentication Code):
+MAC is a cryptographic code generated by the UE to authenticate messages during the authentication process. It is calculated based on the derived key and specific parameters.
+Authentication Timeout and Retries:
+Defining policies related to authentication timeout periods.
+Configuring the number of authentication retries allowed before a session is terminated.
+Handling of Authentication Failures:
+Configuring policies for handling authentication failures, including actions to be taken when authentication is unsuccessful.
+Defining how the network responds to repeated authentication failures.
+Subscriber Privacy Protection:
+Configuring policies related to subscriber privacy, including the use of concealed identities or other mechanisms to protect user privacy during authentication.
+Fallback Mechanisms:
+Configuring fallback mechanisms in case the primary authentication method fails.
+Defining alternative methods or procedures to be used for authentication.
+
+Access Type Control:
+Specifying which types of access (e.g., 5G NR, LTE, Wi-Fi) are allowed or restricted for specific UEs.
+Configuring policies related to allowed radio access technologies.
+Access Priority:
+Assigning access priorities to UEs based on various factors such as subscription level, service type, or network conditions.
+Configuring policies to prioritize certain UEs over others.
+Subscriber Identification:
+Defining policies related to how subscriber identification is handled during the access procedure.
+Configuring whether concealed identifiers or other subscriber identity protection mechanisms are used.
+Blacklisting and Whitelisting:
+Configuring policies to blacklist or whitelist specific UEs based on their identities, characteristics, or historical behavior.
+Defining conditions under which a UE is considered blacklisted or whitelisted.
+Location-Based Access Control:
+Configuring policies based on the geographic location of the UE.
+Defining conditions under which access is allowed or restricted based on the location of the UE.
+Emergency Access Policies:
+Defining policies related to emergency access and ensuring that UEs have the necessary access even under emergency situations.
+Configuring priority and access conditions during emergency scenarios.
+Policy Control Function (PCF) Interactions:
+Configuring interactions with the Policy Control Function (PCF) for dynamic access control decisions during runtime.
+Defining policies related to dynamic changes in access parameters based on service requirements.
+Authentication Policies:
+Configuring authentication methods and algorithms used during the authentication and key agreement procedures.
+Defining parameters related to subscriber authentication.
+QoS (Quality of Service) Policies:
+Specifying QoS parameters for different types of services and network slices.
+Defining policies related to bandwidth, latency, and other QoS metrics.
+Security Policies:
+Defining security-related parameters and policies.
+Configuring encryption algorithms, integrity protection, and other security features.
+Mobility Management Policies:
+Configuring policies related to mobility management, handover, and session continuity.
+Defining parameters for managing mobility between different cells or network nodes.
+Policy Control Function (PCF) Interactions:
+Defining interactions with the Policy Control Function (PCF) for dynamic policy decisions during runtime.
+Configuring policies related to dynamic changes in session parameters.
+Subscription Data:
+Configuring how subscription data is used and processed during the access and mobility management procedures.
+Defining how user-specific information is retrieved and applied.
+Network Slicing Policies:
+Defining policies specific to network slicing, which allows the creation of logically isolated network instances with customized characteristics.
+Configuring parameters related to network slice selection and management.
+
+
+
+
+AKA
+
+Authentication and Key Agreement 
+
+
+
+Different polices the AKA
+Subscriber Identity: Access control policies may rely on the subscriber's identity, such as the International Mobile Subscriber Identity (IMSI) or other identifiers unique to the user.
+Authentication: Policies define the authentication mechanisms used to verify the identity of the subscriber or device. AKA involves mutual authentication between the user and the network.
+Security Context: Policies may specify the establishment and maintenance of a security context, including the generation and distribution of session keys for secure communication.
+Authorization Levels: Access control policies may assign different authorization levels based on user profiles, subscription plans, or service agreements. Users with higher authorization levels may have access to more services or resources.
+Location-Based Policies: Some access control policies may take into account the geographical location of the user or device. For example, certain services may be restricted or granted based on the user's location.
+Device Type and Capabilities: Policies may consider the type of device being used and its capabilities. Different devices may have different access permissions and restrictions.
+Roaming Policies: Access control policies often address roaming scenarios, specifying how users are authenticated and authorized when accessing the network outside their home network.
+Time-Based Access: Policies may restrict or grant access based on specific time periods. For example, certain services may only be available during specific hours.
+
+
+
+
+Authentication Policies:
+Specifies the procedures for authenticating the UE during the initial access. This involves verifying the identity of the subscriber using the credentials stored on the Subscriber Identity Module (SIM) card or other secure elements.
+Security Mode Control Policies:
+Governs the negotiation and establishment of security modes between the UE and the network. This includes determining the cryptographic algorithms, key lengths, and other security parameters used during the initial access.
+Subscription Concealed Identifier (SUCI) Policies:
+Defines policies related to the use of Subscription Concealed Identifier (SUCI) during the initial access phase. SUCI helps conceal the permanent identity of the subscriber, providing a level of privacy protection during the establishment of the initial connection.
+Integrity Protection Policies:
+Outlines policies for ensuring the integrity of signaling messages exchanged during the initial access. This involves the use of cryptographic mechanisms to protect against tampering and unauthorized modifications.
+Confidentiality Protection Policies:
+Specifies policies for ensuring the confidentiality of sensitive information exchanged during the initial access. Encryption mechanisms are employed to protect against eavesdropping and unauthorized access to signaling messages.
+Network Authentication Policies:
+Governs the procedures for the network to authenticate itself to the UE during the initial access. This involves verifying the legitimacy of the Authentication Server (AUSF) and the Authentication Management Function (AMF) to ensure that the UE is connecting to a valid and authorized 5G network.
+Privacy Policies:
+Addresses privacy considerations during the initial access, including policies related to the handling and protection of user and subscriber information.
+
+
+
+https://www.telecomtrainer.com/5g-aka-5g-authentication-and-key-agreement/
+
+5G AKA, or 5G Authentication and Key Agreement, is the authentication and key agreement protocol used in 5G networks. 
+It is the successor to the 4G LTE AKA protocol and is designed to provide secure authentication, key exchange, and privacy protection for 5G network users. 
+In this article, we will explore the basics of 5G AKA, its technical specifications, and its benefits.
+Basics of 5G AKA
+The 5G AKA protocol is used to authenticate and establish a secure communication link between a 5G user and a 5G network. 
+It is designed to provide mutual authentication, where both the user and the network authenticate each other's identities, and key agreement, where both parties agree on a set of secret keys that can be used to protect the privacy and integrity of the communication.
+The 5G AKA protocol is based on the challenge-response mechanism, where the network challenges the user to prove their identity by sending a random challenge value, and the user responds with a computed response that is based on a secret key shared with the network. 
+The challenge-response mechanism is used to prevent unauthorized access and to ensure the integrity and privacy of the communication.
+Technical Specifications
+The 5G AKA protocol is defined by the 3rd Generation Partnership Project (3GPP), the same organization that defines the technical specifications for 5G networks. The technical specifications for 5G AKA are defined in 3GPP Release 15, which was released in 2018.
+The 5G AKA protocol is divided into two phases: the initial access authentication phase and the key agreement phase.
+In the initial access authentication phase, the network authenticates the user's identity and verifies that the user is authorized to access the network. 
+The user's identity is verified using a universal subscriber identity (USIM) card, which is a smart card that stores the user's identity and secret keys. 
+The USIM card is inserted into the user's device and is used to generate the response to the network's challenge.
+Once the user's identity is verified, the network and the user exchange messages to establish a set of shared secret keys that can be used to protect the privacy and integrity of the communication.
+In the key agreement phase, the network and the user use the shared secret keys to derive a set of session keys that are used to protect the privacy and integrity of the communication. 
+The session keys are used to encrypt and decrypt the communication, and to authenticate the communication to ensure that it has not been tampered with.
+
+
+Challenges of 5G AKA
+While the 5G AKA protocol provides several benefits, there are also challenges that need to be addressed. These challenges include:
+Network Coverage
+The deployment of 5G networks is still in its early stages, and there are still many areas that lack 5G network coverage. This can make it difficult for users to access 5G networks and benefit from the security and privacy features of the 5G AKA protocol.
+Interoperability
+The 5G AKA protocol is defined by the 3GPP, which means that it is used by all 5G networks that follow the 3GPP specifications. However, there are other organizations that define their own specifications for 5G networks, which can create interoperability issues between different networks.
+Security Threats
+While the 5G AKA protocol is designed to provide enhanced security for 5G networks, there are still security threats that need to be addressed. These include attacks on the USIM card, attacks on the network infrastructure, and attacks on the communication between the user and the network.
+Complexity
+The 5G AKA protocol is more complex than the authentication protocols used in previous generations of mobile networks. This can make it more difficult to implement and maintain, and can create compatibility issues with legacy networks
+
+
+
+
+PLMN Selection Policy:
+Define policies based on Public Land Mobile Network (PLMN) identifiers to prioritize or restrict certain PLMNs for UE access.
+Radio Access Technology (RAT) Selection PolicyT:
+Specify preferences for different RATs (e.g., LTE, NR) based on network capabilities and coverage. This ensures that the UE connects to the most suitable radio access technology available.
+Signal Strength and Quality Policies:
+Set thresholds for signal strength and quality to guide network selection. The UE may prefer networks with stronger signals or better quality based on these thresholds.
+QoS Requirements:
+Consider Quality of Service (QoS) parameters to select networks that meet the required performance criteria. This may involve prioritizing networks that can provide the necessary bandwidth, latency, and reliability for specific services.
+Cost-Based Policies:
+Integrate policies based on the cost of accessing different networks. This could involve selecting networks that provide cost-effective data plans or are part of roaming agreements.
+Energy Efficiency Policies:
+Optimize network selection to minimize power consumption on the UE. This can be essential for devices with limited battery life.
+Load Balancing Policies:
+Distribute user traffic across different access networks to balance the load efficiently. This helps in avoiding congestion in specific networks and optimizing resource utilization.
+User Preferences:
+Allow users to set preferences manually or through applications. For example, users might prioritize connecting to specific networks based on personal preferences or requirements.
+Security Policies:
+Consider security-related factors, such as the encryption capabilities of the network, to ensure a secure connection.
+Network Operator Policies:
+Incorporate policies defined by the network operator, which might include prioritizing certain networks or services based on business agreements or strategic considerations.
+
+
