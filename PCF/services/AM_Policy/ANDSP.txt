@@ -1,0 +1,16 @@
+https://docs.google.com/document/d/1BN-dj4YY_EDEj79fe3n2X7xPoet1bYWawzdr_uxGf0E/edit?tab=t.3thakxhuufn8
+
+Access network discovery and selection policy (ANDSP)
+124.526
+
+
+The ANDSP is used to control the UE behavior related to access network discovery and selection over non-3GPP access networks.
+The ANDSP consists of: 
+WLAN Selection Policy (WLANSP) which is described in clause 4.3.2.; 
+non-3GPP access network (N3AN) node configuration information which is described in clause 4.3.3. 
+
+WLAN selection policy (WLANSP) 
+
+The WLANSP is used to control UE behavior related to selection and reselection of a WLAN.  
+The WLANSP consists of zero or more WLANSP rules. 
+
