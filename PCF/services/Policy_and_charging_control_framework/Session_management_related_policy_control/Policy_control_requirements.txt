@@ -1,0 +1,113 @@
+https://docs.google.com/document/d/1BN-dj4YY_EDEj79fe3n2X7xPoet1bYWawzdr_uxGf0E/edit?tab=t.8x4tus9dzjyp
+
+Gating control requirements
+Gating control shall be applied by the UPF on a per service data flow basis. 
+To enable the PCF gating control decisions, the AF shall report session events (e.g. session termination, modification) to the PCF. For example, session termination, in gating control, may trigger the blocking of packets or "closing the gate".
+Gating Control applies for service data flows of IP type. 
+
+
+
+
+
+QoS control requirements 
+
+
+QoS control at service data flow level
+
+It shall be possible to apply QoS control on a per service data flow basis in the SMF, applicable for service data flows of both IP type and Ethernet type.
+QoS control per service data flow allows the PCC framework to provide the SMF with the authorized QoS to be enforced for each specific service data flow. 
+Criteria such as the QoS subscription information may be used together with policy rules such as, service-based, subscription-based, or predefined PCF internal policies to derive the authorized QoS to be enforced for a service data flow.
+It shall be possible to apply multiple PCC rules, without application provided information, using different authorised QoS within a single PDU Session and within the limits of the Subscribed QoS profile. 
+
+
+
+
+QoS control at QoS Flow level
+
+
+
+It shall be possible for the PCC framework to support control of QoS reservation procedures (UE-initiated or network initiated). 
+It shall be possible to determine the QoS to be applied in QoS reservation procedures (QoS control) based on the authorised QoS of the service data flows that are applicable to the QoS Flow and on criteria such as the QoS subscription information, service based policies, and/or predefined PCF internal policies.
+It shall be possible for the SMF to determine the authorized QoS of a QoS Flow using the PCC rules associated to the QoS Flow, and the SMF shall be able to notify the PCF if the QoS Flow is removed or the GFBR of a QoS Flow can no longer (or can again) be guaranteed.
+It shall be possible for the PCC framework to support control of QoS for the packet traffic of the PDU Session.
+The PCC framework shall be able to provide policy control in the presence of NAT devices. 
+This may be accomplished by providing appropriate address and port information to the PCF.
+The enforcement of the control for QoS reservation procedures for a QoS Flow shall allow for a downgrading or an upgrading of the requested QoS as part of a UE-initiated QoS Flow establishment and modification. 
+The PCC framework shall be able to provide a mechanism to initiate QoS Flow establishment and modification as part of the QoS control.
+The PCC framework shall be able to handle QoS Flows that require a guaranteed bitrate (GBR bearers) and QoS Flows for which there is no guaranteed bitrate (non-GBR bearers). 
+The above text describes a framework for managing and controlling the Quality of Service (QoS) for data flows in a mobile network using a Policy and Charging Control (PCC) framework. Here's a simplified explanation with real-life examples:
+Key Points Simplified:
+QoS Control for Data Flow:
+
+
+The framework can manage QoS reservation when the user (UE - User Equipment) or the network initiates a request.
+Example: When you stream a video on Netflix, the network ensures smooth playback by reserving bandwidth for your video stream. This process might be triggered by the app (user-initiated) or the network.
+How QoS is Decided:
+
+
+The system applies QoS rules based on:
+Your subscription plan (e.g., premium plans get higher speed).
+Service-specific policies (e.g., video streaming gets priority over file downloads).
+Predefined internal rules of the network.
+Example: If you're on a gaming plan, the network ensures low latency for your games, even if other activities (like downloading files) are happening simultaneously.
+SMF and QoS Authorization:
+
+
+The Session Management Function (SMF) checks the authorized QoS for a specific data flow using PCC rules.
+If the network can't provide the requested QoS (e.g., due to congestion), the SMF informs the Policy Control Function (PCF).
+Example: If you're streaming a 4K video and the network is congested, the system might lower the quality to 720p temporarily to ensure playback continues.
+QoS for PDU Sessions:
+
+
+The framework manages QoS for Packet Data Unit (PDU) Sessions, which are connections between your device and the network.
+Example: When you start a video call, the system creates a session with QoS that prioritizes voice and video data to maintain clear communication.
+Handling NAT Devices:
+
+
+The system works even when devices are behind Network Address Translation (NAT), by providing the PCF with the correct address and port information.
+Example: If you're connected to Wi-Fi at home, your phone’s private IP address is hidden behind the router's public IP. The network still manages QoS by tracking your traffic.
+Adjusting QoS Dynamically:
+
+
+The framework allows the QoS to be upgraded or downgraded based on network conditions or user needs.
+Example: If you're uploading a file while downloading a movie, the network might temporarily reduce download speed to prioritize the upload.
+Handling Different QoS Types:
+
+
+The system supports:
+Guaranteed Bitrate (GBR) flows (e.g., for voice calls, which require continuous and steady bandwidth).
+Non-Guaranteed Bitrate (non-GBR) flows (e.g., for web browsing, where occasional delays are acceptable).
+Example: During a voice call, the network ensures no interruption (GBR). However, if you're browsing a website, small delays are acceptable (non-GBR).
+Initiating QoS Flows:
+
+
+The network can start or modify QoS flows as needed.
+Example: If you switch from a music app to a video call, the network adjusts QoS to prioritize the call over music streaming.
+Real-Time Example:
+Imagine you are using a 5G-enabled smartphone. Here’s how the PCC framework works in practice:
+Video Streaming on Netflix:
+
+
+When you start a movie in 4K, the app requests high bandwidth (QoS reservation).
+The PCC framework checks your subscription and prioritizes your streaming over other background apps on your phone.
+Switching to a Video Call:
+
+
+Midway, you get a video call. The network reduces the Netflix stream quality (downgrade QoS) and prioritizes the video call (upgrade QoS).
+Traffic Management:
+
+
+Your phone is behind your home Wi-Fi router (NAT). The network still recognizes your phone's data packets and applies QoS correctly.
+Gaming While Downloading:
+
+
+If you’re playing an online game while downloading a large file, the network gives your game traffic priority (GBR) to ensure low latency, while download traffic (non-GBR) is slowed down temporarily.
+In summary, the PCC framework ensures the best possible experience for different types of data traffic, even in complex scenarios like network congestion, multiple active apps, or devices behind NAT.
+This guarantees smooth and efficient use of network resources for all users.
+
+
+QoS control at PDU Session level
+
+It shall be possible for the PCF to provide the authorized Session-AMBR values, default 5QI/ARP combination for PDU Session of IP type, Ethernet type and unstructured type unconditionally or conditionally, i.e. per PDU Session type and/or RAT type.
+It shall be possible for the PCF to request a change of the unconditional or conditional authorized Session-AMBR value(s) at a specific point in time.
+
