@@ -1,0 +1,77 @@
+https://docs.google.com/document/d/1Zetks3YhpaQtLLzyElvU3efc-3FUTTuiJVA7TiOnUGY/edit?tab=t.65v5qj7szacz
+
+29.525
+
+Overview
+The UE Policy Control Service, as defined in 3GPP TS 23.502 [3] and 3GPP TS 23.503 [4], is provided by the Policy Control Function (PCF).
+This service is used as part of the provisioning of UE policies determined by the PCF to the UE via the AMF, and used as part of provisioning of N2 PC5 policy determined by the PCF to the NG-RAN via the AMF, and offers the following functionalities:
+
+- creation of the UE Policy Association requested by the NF service consumer (e.g. AMF);
+- provisioning of the policy control request triggers to the NF service consumer (e.g. AMF);
+- provisioning of the UE policy to the V-PCF by the H-PCF in the roaming case;
+- provisioning of the N2 PC5 policy to the V-PCF by the H-PCF in the roaming case;
+- reporting of the met policy control request trigger; and
+- deletion of the the UE Policy Association requested by the NF service consumer (e.g. AMF).
+
+
+
+Service Architecture
+The 5G System Architecture is defined in 3GPP TS 23.501 [2]. The Policy and Charging related 5G architecture is also described in 3GPP TS 29.513 [7].
+The UE Policy Control Service (Npcf_UEPolicyControl) is part of the Npcf service-based interface exhibited by the Policy Control Function (PCF).
+The known consumers of the Npcf_UEPolicyControl service are the Access and Mobility Management Function (AMF) and the Visited Policy Control Function (V-PCF).
+
+The AMF accesses the UE Policy Control Service at the PCF via the N15 Reference point. 
+In the roaming scenario, the N15 reference point is located between the V-PCF in the visited network and the AMF. 
+The V-PCF accesses the UE Policy Control Service at the Home Policy Control Function (H-PCF) via the N24 Reference point.
+
+
+For non-roaming scenarios, the Policy Control Function (PCF):
+- Supports unified policy framework to govern network behaviour; and
+- Provides UE policy, including Access Network Discovery and Selection Policy (ANDSP), UE Route Selection Policy (URSP), and V2XP (Vehicle-to-Everything Policy) via the AMF transparently to the UE;
+- Provides policy control request triggers to the AMF; and
+
+NOTE 1: The PCF invokes the Namf_Communication service specified in 3GPP TS 29.518 [14] to provide the UE Policy.
+
+- Provides N2 PC5 policy, containing the PC5 QoS parameters used by NG-RAN for V2X communication via the AMF to the NG-RAN.
+
+NOTE 2: The PCF invokes the Namf_Communication service specified in 3GPP TS 29.518 [14] to provide the N2 PC5 Policy.
+
+For roaming scenarios, the Visited Policy Control Function (V-PCF):
+- Provides policy control request triggers to the AMF;
+- Provides the ANDSP of the VPLMN via the AMF transparently to the UE;
+- Forwards the ANDSP, URSP and V2XP received form the H-PCF via the AMF to the UE.
+
+NOTE 3: The V-PCF invokes the Namf_Communication service specified in 3GPP TS 29.518 [14] to provide the UE Policy.
+
+- Forwards the N2 PC5 policy the H-PCF via the AMF to the NG-RAN.
+
+NOTE 4: The V-PCF invokes the Namf_Communication service specified in 3GPP TS 29.518 [14] to provide the N2 PC5 Policy.
+
+For roaming scenarios, the Home Policy Control Function (H-PCF):
+- Provides policy control request triggers to the V-PCF; and
+- Provides the ANDSP, URSP and V2XP of the HPLMN to the V-PCF for forwarding to the UE via the the AMF.
+- Provides the N2 PC5 policy to the V-PCF for forwarding to the NG-RAN via the the AMF.
+
+
+NF Service Consumers
+
+The Access and Mobility Management function (AMF) performs:
+- Registration management;
+- Connection management;
+- Reachability management;
+- Mobility Management;
+- Forwarding of UE Policy towards the served UE;
+- Reporting of the UE state to the (V-)PCF; and
+- Forwarding of the UE policy enforcement result received from the UE to the (V-)PCF.
+
+NOTE: The AMF invokes the Namf_Communication service specified in 3GPP TS 29.518 [14] to report the UE policy enforcement result.
+
+- Forwarding of the N2 PC5 policy towards the NG-RAN.
+
+The Visited Policy Control Function (V-PCF) provides the functions described in subclause 4.1.3.1 towards the visited network as NF service producer and acts as NF Service consumer toward the H-PCF, performing the following functions:
+- Receiving policy control request triggers, ANDSP, URSP and V2XP from the H-PCF;
+- Receiving the N2 PC5 policy from the H-PCF; and
+- Reporting of the UE state and UE policy enforcement result to the H-PCF.
+
+
+
