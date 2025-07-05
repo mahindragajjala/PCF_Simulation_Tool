@@ -1,0 +1,165 @@
+PCF:
+
+func createBDTPolicyContextProcedure(request *models.BdtReqData) (
+    header http.Header, response *models.BdtPolicy, problemDetails *models.ProblemDetails) {
+    response = &models.BdtPolicy{}
+    logger.Bdtpolicylog.Traceln("Handle BDT Policy Create")
+
+    pcfSelf := pcf_context.PCF_Self()
+    udrUri := getDefaultUdrUri(pcfSelf)
+    if udrUri == "" {
+        // Can't find any UDR support this Ue
+        problemDetails = &models.ProblemDetails{
+            Status: http.StatusServiceUnavailable,
+            Detail: "Can't find any UDR which supported to this PCF",
+        }
+        logger.Bdtpolicylog.Errorln("createBDTPolicyContextProcedure Can't find any UDR support this Ue",problemDetails.Detail)
+        return nil, nil, problemDetails
+    }
+    pcfSelf.DefaultUdrURI = udrUri
+    pcfSelf.SetDefaultUdrURI(udrUri)
+
+    // Query BDT DATA array from UDR
+    client := util.GetNudrClient(udrUri)
+    //Bhavani added Time stamp_starting
+         start_time := time.Now()
+    bdtDatas, httpResponse, err := client.DefaultApi.PolicyDataBdtDataGet(context.Background())
+    elapsed_time := time.Now().Sub(start_time)
+        logger.Bdtpolicylog.Infoln(" client.DefaultApi.PolicyDataBdtDataGet time_taken =",elapsed_time.Seconds())
+        //ending
+    if err != nil || httpResponse == nil || httpResponse.StatusCode != http.StatusOK {
+        problemDetails = &models.ProblemDetails{
+            Status: http.StatusServiceUnavailable,
+            Detail: "Query to UDR failed",
+        }
+        logger.Bdtpolicylog.Errorf("createBDTPolicyContextProcedure Query to UDR failed")
+        return nil, nil, problemDetails
+    }
+    defer func() {
+        if rspCloseErr := httpResponse.Body.Close(); rspCloseErr != nil {
+            logger.Bdtpolicylog.Errorf("PolicyDataBdtDataGet response body cannot close: %+v", rspCloseErr)
+        }
+    }()
+    // TODO: decide BDT Policy from other bdt policy data
+    response.BdtReqData = deepcopy.Copy(request).(*models.BdtReqData)
+    var bdtData *models.BdtData
+    var bdtPolicyData models.BdtPolicyData
+    for _, data := range bdtDatas {
+        // If ASP has exist, use its background data policy
+        if request.AspId == data.AspId {
+            bdtData = &data
+            break
+        }
+    }
+    // Only support one bdt policy, TODO: more policy for decision
+    if bdtData != nil {
+        // found
+        // modify policy according to new request
+        bdtData.TransPolicy.RecTimeInt = request.DesTimeInt
+    } else {
+        // use default bdt policy, TODO: decide bdt transfer data policy
+        bdtData = &models.BdtData{
+            AspId:       request.AspId,
+            BdtRefId:    uuid.New().String(),
+            TransPolicy: getDefaultTransferPolicy(1, *request.DesTimeInt),
+        }
+    }
+    if request.NwAreaInfo != nil {
+        bdtData.NwAreaInfo = *request.NwAreaInfo
+    }
+    bdtPolicyData.SelTransPolicyId = bdtData.TransPolicy.TransPolicyId
+    // no support feature in subclause 5.8 of TS29554
+    bdtPolicyData.BdtRefId = bdtData.BdtRefId
+    bdtPolicyData.TransfPolicies = append(bdtPolicyData.TransfPolicies, bdtData.TransPolicy)
+    response.BdtPolData = &bdtPolicyData
+    bdtPolicyID, err := pcfSelf.AllocBdtPolicyID()
+    if err != nil {
+        problemDetails = &models.ProblemDetails{
+            Status: http.StatusServiceUnavailable,
+            Detail: "Allocate bdtPolicyID failed",
+        }
+        logger.Bdtpolicylog.Errorf("createBDTPolicyContextProcedure Allocate bdtPolicyID failed")
+        return nil, nil, problemDetails
+    }
+
+    pcfSelf.BdtPolicyPool.Store(bdtPolicyID, response)
+
+    // Update UDR BDT Data(PUT)
+    param := Nudr_DataRepository.PolicyDataBdtDataBdtReferenceIdPutParamOpts{
+        BdtData: optional.NewInterface(*bdtData),
+    }
+
+    var updateRsp *http.Response
+    //Bhavani added Time stamp_starting
+         //start_time := time.Now()
+    if rsp, rspErr := client.DefaultApi.PolicyDataBdtDataBdtReferenceIdPut(context.Background(),
+        bdtPolicyData.BdtRefId, &param); rspErr != nil {
+        logger.Bdtpolicylog.Errorf("createBDTPolicyContextProcedure UDR Put BdtDate error[%s]", rspErr.Error())
+    } else {
+        updateRsp = rsp
+    }
+    defer func() {
+        if rspCloseErr := updateRsp.Body.Close(); rspCloseErr != nil {
+            logger.Bdtpolicylog.Errorf("PolicyDataBdtDataBdtReferenceIdPut response body cannot close: %+v", rspCloseErr)
+        }
+    }()
+
+    locationHeader := util.GetResourceUri(models.ServiceName_NPCF_BDTPOLICYCONTROL, bdtPolicyID)
+    header = http.Header{
+        "Location": {locationHeader},
+    }
+    logger.Bdtpolicylog.Tracef("BDT Policy Id[%s] Create", bdtPolicyID)
+    return header, response, problemDetails
+}
+
+
+
+func (a *DefaultApiService) PolicyDataBdtDataGet(ctx context.Context) ([]models.BdtData, *http.Response, error) {
+    var (
+        localVarHTTPMethod   = strings.ToUpper("Get")
+        localVarPostBody     interface{}
+        localVarFormFileName string
+        localVarFileName     string
+        localVarFileBytes    []byte
+        localVarReturnValue  []models.BdtData
+    )
+
+    // create path and map variables
+    localVarPath := a.client.cfg.BasePath() + "/policy-data/bdt-data"
+
+    localVarHeaderParams := make(map[string]string)
+    localVarQueryParams := url.Values{}
+    localVarFormParams := url.Values{}
+
+
+
+UDR:
+    {
+        "HTTPPolicyDataBdtDataGet",
+        strings.ToUpper("Get"),
+        "/policy-data/bdt-data",
+        HTTPPolicyDataBdtDataGet,
+    },
+// HTTPPolicyDataBdtDataGet -
+func HTTPPolicyDataBdtDataGet(c *gin.Context) {
+    req := http_wrapper.NewRequest(c.Request, nil)
+
+    rsp := producer.HandlePolicyDataBdtDataGet(req)
+
+    sendResponse(c, rsp)
+}
+func HandlePolicyDataBdtDataGet(request *http_wrapper.Request) *http_wrapper.Response {
+    logger.DataRepoLog.Infof("HandlePolicyDataBdtDataGet")
+
+    collName := "policyData.bdtData"
+
+    response := PolicyDataBdtDataGetProcedure(collName)
+    return http_wrapper.NewResponse(http.StatusOK, nil, response)
+}
+
+func PolicyDataBdtDataGetProcedure(collName string) (response *[]map[string]interface{}) {
+    filter := bson.M{}
+    bdtDataArray := MongoDBLibrary.RestfulAPIGetMany(collName, filter)
+    return &bdtDataArray
+}
+
