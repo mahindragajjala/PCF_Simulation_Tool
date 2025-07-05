@@ -1,0 +1,51 @@
+https://docs.google.com/document/d/1BN-dj4YY_EDEj79fe3n2X7xPoet1bYWawzdr_uxGf0E/edit?tab=t.cz9hetkhjzvl
+
+NGAP provides the signalling service between the NG-RAN node and the AMF that is required to fulfil the NGAP functions
+
+NGAP services are divided into two groups: 
+Non UE-associated services: 
+They are related to the whole NG interface instance between the NG-RAN node and AMF utilising a non UE-associated signalling connection. 
+
+UE-associated services: They are related to one UE. NGAP functions that provide these services are associated with a UE-associated signalling connection that is maintained for the UE in question.
+
+
+
+The NGSetupRequest is an important message in the establishment and configuration of the NGAP connection between the gNB and the 5G core network.
+It plays a role in the initial setup of communication channels, bearer establishment, and other functions.
+
+
+
+Initiation: 
+
+
+The NGSetupRequest message is sent by the gNB to the 5G core network when it needs to establish a connection or when specific configuration changes are required. 
+This message is part of the initial setup procedure when a UE (User Equipment) tries to connect to the 5G network.
+
+
+Information Exchange: 
+
+
+The NGSetupRequest message contains information about the gNB, its capabilities, and the desired configuration parameters. 
+This information helps the 5G core network determine how to configure the NGAP connection with the gNB.
+
+
+Handling: 
+
+
+Upon receiving the NGSetupRequest, the 5G core network processes the request and prepares to configure the NGAP connection accordingly. 
+This may involve setting up specific bearers, allocating resources, and establishing communication channels.
+Response: 
+
+
+The 5G core network responds to the gNB with an NGSetupResponse message, indicating whether the request was accepted and providing further details about the configuration. If the request is accepted, the NGAP connection is established, and the gNB and the 5G core network can communicate effectively.
+
+
+NG interface supports the exchange of signalling information between the NG-RAN and 5GC .
+from a logical standpoint, the NG is a point-to-point interface between an NG-RAN node and a 5GC node. 
+A point-to-point logical interface is feasible even in the absence of a physical direct connection between the NGRAN and 5GC; 
+the NG interface supports control plane and user plane separation; 
+the NG interface separates Radio Network Layer and Transport Network Layer; 
+the NG interface is future proof to fulfil different new requirements and support of new services and new functions; 
+the NG interface is decoupled with the possible NG-RAN deployment variants; 
+the NG Application Protocol supports modular procedures design and uses a syntax allowing optimized encoding /decoding efficiency. 
+
