@@ -1,0 +1,9 @@
+When the "IMS_SBI" feature is supported, the AF may provide the status of the service information.
+
+If the AF provides service information that has been fully negotiated (e.g. based on the SDP answer), the AF may include the "servInfStatus" attribute set to "FINAL". In this case the PCF shall authorize the session and provision the corresponding PCC rules to the SMF.
+
+The AF may additionally provide preliminary service information not fully negotiated yet (e.g. based on the SDP offer) at an earlier stage. To do so, the AF shall include the "servInfStatus" attribute set to "PRELIMINARY". 
+
+Upon receipt of such preliminary service information, the PCF shall perform an early authorization check of the service information. 
+
+If the AF requests the PCF to report the access network information together with preliminary service information, the PCF shall immediately configure the SMF to provide the access network information.
