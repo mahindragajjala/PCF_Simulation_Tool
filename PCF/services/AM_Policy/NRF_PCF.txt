@@ -1,0 +1,1040 @@
+NF (PCF) registration to NRF
+
+1. The NF Service Consumer shall send a PUT request to the resource URI representing the NF Instance. 
+The URI is determined by the NF Instance. 
+The variable {nfInstanceID} represents an identifier, provided by the NF Service Consumer, that shall be globally unique inside the PLMN of the NRF where the NF is being registered. 
+The format of the NF Instance ID shall be a Universally Unique Identifier (UUID). EXAMPLE: UUID version 4: "4947a69a-f61b-4bc1-b9da-47c9c5d14b64" The payload body of the PUT request shall contain a representation of the NF Instance to be created.
+2. On success, "201 Created" shall be returned, the payload body of the PUT response shall contain the representation of the created resource and the "Location" header shall contain the URI of the created resource. 
+Additionally, the NRF returns a "heart-beat timer" containing the number of seconds expected between two consecutive heart-beat messages from an NF Instance to the NRF (see subclause 5.2.2.3.2). 
+
+The representation of the created resource may be a complete NF Profile or a NF Profile just including the mandatory attributes of the NF Profile and the attributes which the NRF added or changed (see Annex B). 
+
+If the registration of the NF instance fails at the NRF due to errors in the encoding of the NFProfile JSON object, the NRF shall return "400 Bad Request" status code with the ProblemDetails IE providing details of the error. 
+
+If the registration of the NF instance fails at the NRF due to NRF internal errors, the NRF shall return "500 Internal Server Error" status code with the ProblemDetails IE providing details of the error.
+
+
+
+
+
+
+Client :
+
+
+		localVarHTTPMethod   = strings.ToUpper("Put")
+ http://192.168.149.72:8000/nnrf-nfm/v1/nf-instances/{nfInstanceID}
+
+	{
+		"RegisterNFInstance",
+		strings.ToUpper("Put"),
+		"/nf-instances/:nfInstanceID",
+		HTTPRegisterNFInstance,
+	},
+
+	profile, err := consumer.BuildNFInstance(self)
+	logger.CfgLog.Infoln("profile-----init.go:", profile) //mahindra
+	//2024-05-08 12:18:57.595399 [I] profile-----init.go: {a38d8346-9f28-48c2-9e65-ff325c371pcf PCF REGISTERED 0 <nil> <nil> [] []   [192.168.149.72] [] <nil> [] [] <nil> 0 0 0 area1 <nil> <nil> <nil> <nil> <nil> <nil> 0xc000349450 <nil> <nil> <nil> map[] <nil> false 0xc000343338 false false []} (free5gc/service.(*PCF).Start|236|init.go)
+
+
+
+	logger.AppLog.Infoln("self.NrfUri-------->", self.NrfUri)
+	//2024-05-08 12:18:57.595423 [I] self.NrfUri--------> http://192.168.149.72:8000 (free5gc/service.(*PCF).Start|240|init.go)
+
+	logger.AppLog.Infoln(" self.NfId-------->", self.NfId)
+	//2024-05-08 12:18:57.595439 [I]  self.NfId--------> a38d8346-9f28-48c2-9e65-ff325c371pcf (free5gc/service.(*PCF).Start|241|init.go)
+
+	logger.AppLog.Infoln("profile------>", profile)
+	//2024-05-08 12:18:57.595463 [I] profile------> {a38d8346-9f28-48c2-9e65-ff325c371pcf PCF REGISTERED 0 <nil> <nil> [] []   [192.168.149.72] [] <nil> [] [] <nil> 0 0 0 area1 <nil> <nil> <nil> <nil> <nil> <nil> 0xc000349450 <nil> <nil> <nil> map[] <nil> false 0xc000343338 false false []} (free5gc/service.(*PCF).Start|242|init.go)
+
+
+
+
+func BuildNFInstance(context *pcf_context.PCFContext) (profile models.NfProfile, err error) {
+	profile.NfInstanceId = context.NfId
+	logger.AppLog.Infoln("profile.NfInstanceId---nf_management.go-->", profile.NfInstanceId)
+	//2024-05-08 12:18:57.595293 [I] profile.NfInstanceId---nf_management.go--> a38d8346-9f28-48c2-9e65-ff325c371pcf (free5gc/consumer.BuildNFInstance|19|nf_management.go)
+
+	profile.NfType = models.NfType_PCF
+	logger.AppLog.Infoln("profile.NfType ------>", profile.NfType)
+	//2024-05-08 12:18:57.595324 [I] profile.NfType ------> PCF (free5gc/consumer.BuildNFInstance|22|nf_management.go)
+
+	profile.NfStatus = models.NfStatus_REGISTERED
+	logger.AppLog.Infoln("profile.NfStatus------>", profile.NfStatus)
+	//2024-05-08 12:18:57.595346 [I] profile.NfStatus------> REGISTERED (free5gc/consumer.BuildNFInstance|25|nf_management.go)
+
+	profile.Ipv4Addresses = append(profile.Ipv4Addresses, context.RegisterIPv4)
+	logger.AppLog.Infoln("profile.Ipv4Addresses------->", profile.Ipv4Addresses)
+	//2024-05-08 12:18:57.595357 [I] profile.Ipv4Addresses-------> [192.168.149.72] (free5gc/consumer.BuildNFInstance|28|nf_management.go)
+
+	service := []models.NfService{}
+	for _, nfService := range context.NfService {
+		service = append(service, nfService)
+	}
+	profile.NfServices = &service
+	profile.PcfInfo = &models.PcfInfo{
+		DnnList: []string{
+			"free5gc",
+			"internet",
+		},
+		// SupiRanges: &[]models.SupiRange{
+		// 	{
+		// 		//from TS 29.510 6.1.6.2.9 example2
+		//		//no need to set supirange in this moment 2019/10/4
+		// 		Start:   "123456789040000",
+		// 		End:     "123456789059999",
+		// 		Pattern: "^imsi-12345678904[0-9]{4}$",
+		// 	},
+		// },
+	}
+	if context.Locality != "" {
+		profile.Locality = context.Locality
+	}
+	return
+}
+	_, self.NfId, err = consumer.SendRegisterNFInstance(self.NrfUri, self.NfId, profile)
+	if err != nil {
+		initLog.Errorf("PCF register to NRF Error[%s]", err.Error())
+	}
+	
+	//to the structure: {apiRoot}/nnrf-nfm/v1/nf-instances/{nfInstanceId}'
+
+func SendRegisterNFInstance(nrfUri, nfInstanceId string, profile models.NfProfile) (
+	resouceNrfUri string, retrieveNfInstanceID string, err error) {
+	// Set client and set url
+	//--------------------------------------------------------------
+	type Configuration struct {
+	url           string
+	basePath      string
+	host          string
+	defaultHeader map[string]string
+	userAgent     string
+	httpClient    *http.Client
+	}
+	
+	
+	func NewConfiguration() *Configuration {
+	cfg := &Configuration{
+		basePath:      "https://example.com/nnrf-nfm/v1",
+		url:           "{apiRoot}/nnrf-nfm/v1",
+		defaultHeader: make(map[string]string),
+		userAgent:     "OpenAPI-Generator/1.0.0/go",
+	}
+	return cfg
+	}
+	
+	//apiRoot := http://192.168.149.72:8000
+	//func Replace(s, old, new string, n int) string
+	func (c *Configuration) SetBasePath(apiRoot string) {
+	url := c.url
+
+	// Replace apiRoot
+	url = strings.Replace(url, "{"+"apiRoot"+"}", apiRoot, -1)
+
+	c.basePath = url
+	}
+	
+		// APIClient manages communication with the NRF NFManagement Service API v1.0.0
+		// In most cases there should be only one, shared, APIClient.
+		type APIClient struct {
+			cfg    *Configuration
+			common service // Reuse a single struct instead of allocating one for each service on the heap.
+
+			// API Services
+			NFInstanceIDDocumentApi    *NFInstanceIDDocumentApiService
+			NFInstancesStoreApi        *NFInstancesStoreApiService
+			SubscriptionIDDocumentApi  *SubscriptionIDDocumentApiService
+			SubscriptionsCollectionApi *SubscriptionsCollectionApiService
+			NotificationApi            *NotificationApiService
+		}
+	
+	
+		// NewAPIClient creates a new API client. Requires a userAgent string describing your application.
+		// optionally a custom http.Client to allow for advanced features such as caching.
+		func NewAPIClient(cfg *Configuration) *APIClient {
+			if cfg.httpClient == nil {
+				cfg.httpClient = http.DefaultClient
+				cfg.httpClient.Transport = &http2.Transport{
+					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				}
+			}
+
+			c := &APIClient{}
+			c.cfg = cfg
+			c.common.client = c
+
+			// API Services
+			c.NFInstanceIDDocumentApi = (*NFInstanceIDDocumentApiService)(&c.common)
+			c.NFInstancesStoreApi = (*NFInstancesStoreApiService)(&c.common)
+			c.SubscriptionIDDocumentApi = (*SubscriptionIDDocumentApiService)(&c.common)
+			c.SubscriptionsCollectionApi = (*SubscriptionsCollectionApiService)(&c.common)
+			c.NotificationApi = (*NotificationApiService)(&c.common)
+			return c
+		}
+
+	//--------------------------------------------------------------
+	
+	
+	
+	configuration := Nnrf_NFManagement.NewConfiguration()
+	logger.AppLog.Println("configuration---nf_management--->", configuration)
+	//2024-05-08 12:18:57.595479 [I] configuration---nf_management---> &{{apiRoot}/nnrf-nfm/v1 https://example.com/nnrf-nfm/v1  map[] OpenAPI-Generator/1.0.0/go <nil>} (free5gc/consumer.SendRegisterNFInstance|60|nf_management.go)
+
+	nrfconfig := configuration.SetBasePath(nrfUri)
+
+	logger.AppLog.Println("nrfconfig---->", nrfconfig)    //Taking the original ip address from the config
+	//2024-05-08 12:18:57.595494 [I] nrfconfig----> http://192.168.149.72:8000/nnrf-nfm/v1 (free5gc/consumer.SendRegisterNFInstance|62|nf_management.go)
+
+	client := Nnrf_NFManagement.NewAPIClient(configuration) // taking the all the client services
+	logger.AppLog.Println("client---->", client)
+	//2024-05-08 12:18:57.595531 [I] client----> &{0xc000349630 {0xc00030d740} 0xc00030d748 0xc00030d748 0xc00030d748 0xc00030d748 0xc00030d748} (free5gc/consumer.SendRegisterNFInstance|64|nf_management.go)
+
+
+	//seleting the requied api route.
+	var res *http.Response
+	for {
+		_, res, err = client.NFInstanceIDDocumentApi.RegisterNFInstance(context.TODO(), nfInstanceId, profile)
+		if err != nil || res == nil {
+			// TODO : add log
+			logger.Consumerlog.Errorln(fmt.Errorf("PCF register to NRF Error[%v] %s ", err.Error(), logger.LineInfo())) //changed
+			time.Sleep(2 * time.Second)
+			continue
+		}
+		defer func() {
+			if resCloseErr := res.Body.Close(); resCloseErr != nil {
+				logger.Consumerlog.Errorf("RegisterNFInstance response body cannot close: %+v", resCloseErr)
+			}
+		}()
+		status := res.StatusCode
+		if status == http.StatusOK {
+			// NFUpdate
+			break
+		} else if status == http.StatusCreated {
+			// NFRegister
+			resourceUri := res.Header.Get("Location")
+			resouceNrfUri = resourceUri[:strings.Index(resourceUri, "/nnrf-nfm/")]
+			retrieveNfInstanceID = resourceUri[strings.LastIndex(resourceUri, "/")+1:]
+			break
+		} else {
+			logger.Consumerlog.Errorln("NRF return wrong status code", status) //changed
+		}
+	}
+
+	return resouceNrfUri, retrieveNfInstanceID, err
+}
+
+
+//-----------------------------------------------------------------------------------------
+
+func (a *NFInstanceIDDocumentApiService) RegisterNFInstance(ctx context.Context, nfInstanceID string, nfProfile models.NfProfile) (models.NfProfile, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = strings.ToUpper("Put")
+		localVarPostBody     interface{}
+		localVarFormFileName string
+		localVarFileName     string
+		localVarFileBytes    []byte
+		localVarReturnValue  models.NfProfile
+	)
+	
+
+
+Server:
+
+
+
+// RegisterNFInstance - Register a new NF Instance
+func HTTPRegisterNFInstance(c *gin.Context) {
+    var nfprofile models.NfProfile
+
+    // step 1: retrieve http request body
+    requestBody, err := c.GetRawData()
+
+    if err != nil {
+
+        problemDetail := models.ProblemDetails{
+            Title:  "System failure",
+            Status: http.StatusInternalServerError,
+            Detail: err.Error(),
+            Cause:  "SYSTEM_FAILURE",
+        }
+
+        logger.ManagementLog.Errorln("HTTPRegisterNFInstance: Unable to Get Request Body RawData, got error ", err)
+        c.JSON(http.StatusInternalServerError, problemDetail)
+        return
+    }
+
+    // step 2: convert requestBody to openapi models
+    err = openapi.Deserialize(&nfprofile, requestBody, "application/json")
+    if err != nil {
+
+        problemDetail := "[Request Body] " + err.Error()
+
+        rsp := models.ProblemDetails{
+            Title:  "Malformed request syntax",
+            Status: http.StatusBadRequest,
+            Detail: problemDetail,
+        }
+
+        logger.ManagementLog.Errorln("Deserialize error in HTTPRegisterNFInstance ", problemDetail) //changed
+        c.JSON(http.StatusBadRequest, rsp)
+        return
+    }
+
+    // step 3: encapsulate the request by http_wrapper package
+    logger.AppLog.Infoln("c.Request---->", c.Request)
+
+    req := http_wrapper.NewRequest(c.Request, nfprofile)
+    logger.AppLog.Infoln("req----->", req)
+    // step 4: call producer
+    httpResponse := producer.HandleNFRegisterRequest(req)
+
+    for key, val := range httpResponse.Header {
+        c.Header(key, val[0])
+    }
+
+    responseBody, err := openapi.Serialize(httpResponse.Body, "application/json")
+    if err != nil {
+
+        logger.ManagementLog.Warnln(err)
+        logger.ManagementLog.Errorln("Deserialize error in HTTPRegisterNFInstance ", nfprofile.NfInstanceId)
+
+        problemDetails := models.ProblemDetails{
+            Status: http.StatusInternalServerError,
+            Cause:  "SYSTEM_FAILURE",
+            Detail: err.Error(),
+        }
+
+        c.JSON(http.StatusInternalServerError, problemDetails)
+    } else {
+        c.Data(httpResponse.Status, "application/json", responseBody)
+    }
+}
+
+func HandleNFRegisterRequest(request *http_wrapper.Request) *http_wrapper.Response {
+    //logger.ManagementLog.Infoln("Handle NFRegisterRequest ")
+
+    nfProfile := request.Body.(models.NfProfile)
+    logger.AppLog.Infoln("nfprofile----->", nfProfile)
+    header, response, isUpdate, problemDetails := NFRegisterProcedure(nfProfile)
+    logger.AppLog.Infof("header:%+v, response:%+v, isUpdate:%+v", header, response, isUpdate)
+
+    if response != nil {
+        if isUpdate {
+            //logger.ManagementLog.Tracef("HandleNFRegisterRequest  registration updated NFRegisterRequest success for NfInstanceId=%s NfType=%s", nfProfile.NfInstanceId, nfProfile.NfType)
+            return http_wrapper.NewResponse(http.StatusOK, header, response)
+        }
+        //logger.ManagementLog.Tracef("HandleNFRegisterRequest  registrated NFRegisterRequest success for NfInstanceId=%s NfType=%s", nfProfile.NfInstanceId, nfProfile.NfType)
+        return http_wrapper.NewResponse(http.StatusCreated, header, response)
+    } else if problemDetails != nil {
+        logger.ManagementLog.Errorf("registration failed with status code=%d for NfInstanceId=%s NfType=%s",
+            int(problemDetails.Status), nfProfile.NfInstanceId, nfProfile.NfType) //changed
+
+        return http_wrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
+    }
+
+    problemDetails = &models.ProblemDetails{
+        Status: http.StatusForbidden,
+        Cause:  "UNSPECIFIED",
+    }
+
+    logger.ManagementLog.Errorf("register failed with status code=%d for NfInstanceId=%s NfType=%s", int(problemDetails.Status), nfProfile.NfInstanceId, nfProfile.NfType) //changed
+    return http_wrapper.NewResponse(http.StatusForbidden, nil, problemDetails)
+}
+
+func NFRegisterProcedure(nfProfile models.NfProfile) (header http.Header, response bson.M,
+    update bool, problemDetails *models.ProblemDetails) {
+    //logger.ManagementLog.Traceln("[NRF] In NFRegisterProcedure")
+    var nf models.NfProfile
+
+    err := nrf_context.NnrfNFManagementDataModel(&nf, nfProfile)
+
+    if err != nil {
+
+        str1 := fmt.Sprint(nfProfile.HeartBeatTimer)
+
+        problemDetails = &models.ProblemDetails{
+            Title:  nfProfile.NfInstanceId,
+            Status: http.StatusBadRequest,
+            Detail: str1,
+        }
+
+        logger.ManagementLog.Errorln("MongoDB-NFRegisterProcedure Error, Nnrf NFManagement Data Model error with status= ", problemDetails.Status) //changed
+        return nil, nil, false, problemDetails
+    }
+
+    // make location header
+    locationHeaderValue := nrf_context.SetLocationHeader(nfProfile)
+    // Marshal nf to bson
+    tmp, err := json.Marshal(nf)
+    logger.AppLog.Println()
+    if err != nil {
+        logger.ManagementLog.Errorf("NFRegisterProcedure Marshal error in NFRegisterProcedure: %+v", err)
+    }
+    //logger.ManagementLog.Infoln("NFRegisterProcedure nf temp :",tmp)
+    putData := bson.M{}
+    err = json.Unmarshal(tmp, &putData)
+    if err != nil {
+        logger.ManagementLog.Errorf("NFRegisterProcedure Unmarshal error in NFRegisterProcedure: %+v", err)
+    }
+    //logger.ManagementLog.Infoln("NFRegisterProcedure nf putData :",putData)
+
+    // set db info
+    collName := "NfProfile"
+    nfInstanceId := nf.NfInstanceId
+    filter := bson.M{"nfInstanceId": nfInstanceId}
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	func RestfulAPIGetOne(collName string, filter bson.M) map[string]interface{} {
+		logger.MongoDBLog.Printf("collName,dbName------>:- collName%+v,dbName%+v", collName, dbName)
+		collection := Client.Database(dbName).Collection(collName)
+
+		var result map[string]interface{}
+		collection.FindOne(context.TODO(), filter).Decode(&result)
+
+		return result
+	}	
+	func RestfulAPIDeleteOne(collName string, filter bson.M) {
+	logger.MongoDBLog.Println("Delecting the collections in the database!..............")
+	collection := Client.Database(dbName).Collection(collName)
+
+	collection.DeleteOne(context.TODO(), filter)
+	}
+	func (coll *Collection) DeleteOne(ctx context.Context, filter interface{},
+	opts ...*options.DeleteOptions) (*DeleteResult, error) {
+
+	return coll.delete(ctx, filter, true, rrOne, opts...)
+}
+
+	//-----------------------------------------------------------------------------------------------------------------------------------
+    // Delete previous NfProfile
+    result := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+    /*
+        func RestfulAPIGetOne(collName string, filter bson.M) map[string]interface{} {
+
+        collection := Client.Database(dbName).Collection(collName)
+
+        var result map[string]interface{}
+        collection.FindOne(context.TODO(), filter).Decode(&result)
+
+        return result
+        }
+    */
+    if result != nil {
+        logger.ManagementLog.Infoln("NFRegisterProcedure Deleting Previous NfProfile ", nf.NfInstanceId)
+        MongoDBLibrary.RestfulAPIDeleteOne(collName, filter)
+    }
+
+    // Update NF Profile case
+    logger.AppLog.Printf("collName, filter, putData---->:- collName:%+v, filter:%+v, putData:%+v", collName, filter, putData)
+	
+	//------------------------------------------------------------------------------------------------------------------------->
+	func RestfulAPIPutOne(collName string, filter bson.M, putData map[string]interface{}) bool {
+	collection := Client.Database(dbName).Collection(collName)
+
+	var checkItem map[string]interface{}
+	collection.FindOne(context.TODO(), filter).Decode(&checkItem)
+
+	if checkItem == nil {
+		collection.InsertOne(context.TODO(), putData)
+		return false
+	} else {
+		collection.UpdateOne(context.TODO(), filter, bson.M{"$set": putData})
+		return true
+		}
+	}
+	
+func GetNofificationUri(nfProfile models.NfProfile) []string {
+	var uriList []string
+
+	// nfTypeCond
+	nfTypeCond := bson.M{
+		"subscrCond": bson.M{
+			"nfType": nfProfile.NfType,
+		},
+	}
+	setUriListByFilter(nfTypeCond, &uriList)
+
+	// NfInstanceIdCond
+	nfInstanceIDCond := bson.M{
+		"subscrCond": bson.M{
+			"nfInstanceId": nfProfile.NfInstanceId,
+		},
+	}
+	setUriListByFilter(nfInstanceIDCond, &uriList)
+
+	// ServiceNameCond
+	if nfProfile.NfServices != nil {
+		var ServiceNameCond bson.M
+		var serviceNames bson.A
+		for _, nfService := range *nfProfile.NfServices {
+			serviceNames = append(serviceNames, string(nfService.ServiceName))
+		}
+		ServiceNameCond = bson.M{
+			"subscrCond.serviceName": bson.M{
+				"$in": serviceNames,
+			},
+		}
+		setUriListByFilter(ServiceNameCond, &uriList)
+	}
+
+	// AmfCond
+	if nfProfile.AmfInfo != nil {
+		amfCond := bson.M{
+			"subscrCond": bson.M{
+				"amfSetId":    (*nfProfile.AmfInfo).AmfSetId,
+				"amfRegionId": (*nfProfile.AmfInfo).AmfRegionId,
+			},
+		}
+		setUriListByFilter(amfCond, &uriList)
+	}
+
+	// GuamiListCond
+	if nfProfile.AmfInfo != nil {
+		var guamiListFilter bson.M
+		if (*nfProfile.AmfInfo).GuamiList != nil {
+			var guamiListBsonArray bson.A
+			for _, guami := range *(*nfProfile.AmfInfo).GuamiList {
+				tmp, err := json.Marshal(guami)
+				if err != nil {
+					logger.ManagementLog.Error(err)
+				}
+				guamiMarshal := bson.M{}
+				err = json.Unmarshal(tmp, &guamiMarshal)
+				if err != nil {
+					logger.ManagementLog.Error(err)
+				}
+
+				guamiListBsonArray = append(guamiListBsonArray, bson.M{"subscrCond": bson.M{"$elemMatch": guamiMarshal}})
+			}
+			guamiListFilter = bson.M{
+				"$or": guamiListBsonArray,
+			}
+		}
+		setUriListByFilter(guamiListFilter, &uriList)
+	}
+
+	// NetworkSliceCond
+	if nfProfile.SNssais != nil {
+		var networkSliceFilter bson.M
+		var snssaisBsonArray bson.A
+		for _, snssai := range *nfProfile.SNssais {
+			tmp, err := json.Marshal(snssai)
+			if err != nil {
+				logger.ManagementLog.Error(err)
+			}
+			snssaiMarshal := bson.M{}
+			err = json.Unmarshal(tmp, &snssaiMarshal)
+			if err != nil {
+				logger.ManagementLog.Error(err)
+			}
+
+			snssaisBsonArray = append(snssaisBsonArray, bson.M{"subscrCond": bson.M{"$elemMatch": snssaiMarshal}})
+		}
+
+		var nsiListBsonArray bson.A
+		if nfProfile.NsiList != nil {
+			for _, nsi := range nfProfile.NsiList {
+				nsiListBsonArray = append(nsiListBsonArray, nsi)
+			}
+		}
+
+		if nsiListBsonArray != nil {
+			networkSliceFilter = bson.M{
+				"$and": bson.A{
+					bson.M{
+						"subscrCond.nsiList": bson.M{
+							"$in": nsiListBsonArray,
+						},
+					},
+					bson.M{
+						"$or": snssaisBsonArray,
+					},
+				},
+			}
+		} else {
+			networkSliceFilter = bson.M{
+				"$and": bson.A{
+					bson.M{
+						"$or": snssaisBsonArray,
+					},
+				},
+			}
+		}
+		setUriListByFilter(networkSliceFilter, &uriList)
+	}
+
+	// NfGroupCond
+	if nfProfile.UdrInfo != nil {
+		nfGroupCond := bson.M{
+			"subscrCond": bson.M{
+				"nfType":    nfProfile.NfType,
+				"nfGroupId": (*nfProfile.UdrInfo).GroupId,
+			},
+		}
+		setUriListByFilter(nfGroupCond, &uriList)
+	} else if nfProfile.UdmInfo != nil {
+		nfGroupCond := bson.M{
+			"subscrCond": bson.M{
+				"nfType":    nfProfile.NfType,
+				"nfGroupId": (*nfProfile.UdmInfo).GroupId,
+			},
+		}
+		setUriListByFilter(nfGroupCond, &uriList)
+	} else if nfProfile.AusfInfo != nil {
+		nfGroupCond := bson.M{
+			"subscrCond": bson.M{
+				"nfType":    nfProfile.NfType,
+				"nfGroupId": (*nfProfile.AusfInfo).GroupId,
+			},
+		}
+		setUriListByFilter(nfGroupCond, &uriList)
+	}
+
+	return uriList
+}
+
+	//------------------------------------------------------------------------------------------------------------------------->
+    if MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData) { // true insert
+        logger.ManagementLog.Infof("NFRegisterProcedure  RestfulAPIPutOne True Insert  NfInstanceId=%s NfType=%s", nfInstanceId, nf.NfType)
+        logger.ManagementLog.Infof("Inside PUT")
+        uriList := nrf_context.GetNofificationUri(nf)
+
+        // set info for NotificationData
+        Notification_event := models.NotificationEventType_PROFILE_CHANGED
+        nfInstanceUri := locationHeaderValue
+
+        // receive the rsp from handler
+        for _, uri := range uriList {
+            problemDetails = SendNFStatusNotify(Notification_event, nfInstanceUri, uri)
+
+            /*
+                if problemDetails != nil {
+                    return nil, nil, true, problemDetails
+                }
+            */
+            //logger.ManagementLog.Infoln("NFRegisterProcedure nf uriList :",uri)
+
+        }
+
+        header = make(http.Header)
+        header.Add("Location", locationHeaderValue)
+
+        logger.RegistrationUpdatedCount++
+        //logger.ManagementLog.Infoln("NFRegisterProcedure nf header :",header)
+
+        return header, putData, true, nil
+    } else { // Create NF Profile case
+        logger.AppLog.Println("inserting by the else statement-->")
+        logger.ManagementLog.Infoln("NFRegisterProcedure  Create NF Profile", nfInstanceId, " NfType ", nf.NfType)
+
+        uriList := nrf_context.GetNofificationUri(nf)
+        logger.AppLog.Println("uriList---->", uriList)
+        // set info for NotificationData
+        Notification_event := models.NotificationEventType_REGISTERED
+        nfInstanceUri := locationHeaderValue
+
+        for _, uri := range uriList {
+            problemDetails = SendNFStatusNotify(Notification_event, nfInstanceUri, uri)
+
+            /*
+                if problemDetails != nil {
+                    return nil, nil, false, problemDetails
+                }
+            */
+            //logger.ManagementLog.Infoln("NFRegisterProcedure nf create uriList :",uri)
+        }
+
+        logger.RegistrationCreatedCount++
+
+        header = make(http.Header)
+        header.Add("Location", locationHeaderValue)
+        //logger.ManagementLog.Infoln("NFRegisterProcedure nf create header :",header)
+
+        logger.ManagementLog.Infoln("Location header: ", locationHeaderValue)
+        return header, putData, false, nil
+    }
+}
+func NnrfNFManagementDataModel(nf *models.NfProfile, nfprofile models.NfProfile) error {
+    if nfprofile.NfInstanceId != "" {
+        nf.NfInstanceId = nfprofile.NfInstanceId
+        logger.AppLog.Println("nf.NfInstanceId---management_data.go--->>", nf.NfInstanceId)
+    } else {
+        logger.ManagementLog.Infoln("NfInstanceId field is required", nfprofile.NfInstanceId) //changed
+        return fmt.Errorf("NfInstanceId field is required %s ", logger.LineInfo())
+    }
+
+    if nfprofile.NfType != "" {
+        nf.NfType = nfprofile.NfType
+        logger.AppLog.Println("nf.NfType---management_data.go--->", nf.NfType)
+    } else {
+        logger.ManagementLog.Infoln("NfType field is required", nfprofile.NfInstanceId) //changed
+
+        return fmt.Errorf("NfType field is required %s ", logger.LineInfo())
+    }
+
+    if nfprofile.NfStatus != "" {
+        nf.NfStatus = nfprofile.NfStatus
+        logger.AppLog.Println("nf.NfStatus---management_data.go--->", nf.NfStatus)
+    } else {
+        logger.ManagementLog.Infoln("NfStatus field is required", nfprofile.NfInstanceId) //changed
+
+        return fmt.Errorf("NfStatus field is required %s ", logger.LineInfo())
+    }
+
+    nnrfNFManagementCondition(nf, nfprofile)
+    nnrfNFManagementOption(nf, nfprofile)
+
+    return nil
+}
+
+func nnrfNFManagementCondition(nf *models.NfProfile, nfprofile models.NfProfile) {
+    // HeartBeatTimer
+    if nfprofile.HeartBeatTimer >= 0 {
+        nf.HeartBeatTimer = nfprofile.HeartBeatTimer
+    }
+    // PlmnList
+    if nfprofile.PlmnList != nil {
+        a := make([]models.PlmnId, len(*nfprofile.PlmnList))
+        for i := 0; i < len(*nfprofile.PlmnList); i++ {
+            a[i] = (*nfprofile.PlmnList)[i]
+        }
+        nf.PlmnList = &a
+    } else {
+        nf.PlmnList = &[]models.PlmnId{
+            factory.NrfConfig.Configuration.DefaultPlmnId,
+        }
+    }
+    // fqdn
+    if nfprofile.Fqdn != "" {
+        nf.Fqdn = nfprofile.Fqdn
+    }
+    // interPlmnFqdn
+    if nfprofile.InterPlmnFqdn != "" {
+        nf.InterPlmnFqdn = nfprofile.InterPlmnFqdn
+    }
+    // ipv4Addresses
+    if nfprofile.Ipv4Addresses != nil {
+        // fmt.Println("NsiList")
+        a := make([]string, len(nfprofile.Ipv4Addresses))
+        for i := 0; i < len(nfprofile.Ipv4Addresses); i++ {
+            a[i] = (nfprofile.Ipv4Addresses)[i]
+        }
+        nf.Ipv4Addresses = a
+    }
+    // ipv6Addresses
+    if nfprofile.Ipv6Addresses != nil {
+        // fmt.Println("NsiList")
+        a := make([]string, len(nfprofile.Ipv6Addresses))
+        for i := 0; i < len(nfprofile.Ipv6Addresses); i++ {
+            a[i] = (nfprofile.Ipv6Addresses)[i]
+        }
+        nf.Ipv6Addresses = a
+    }
+}
+
+func nnrfNFManagementOption(nf *models.NfProfile, nfprofile models.NfProfile) {
+    // sNssais
+    if nfprofile.SNssais != nil {
+        // fmt.Println("SNssais")
+        a := make([]models.Snssai, len(*nfprofile.SNssais))
+        for i := 0; i < len(*nfprofile.SNssais); i++ {
+            a[i] = (*nfprofile.SNssais)[i]
+        }
+        nf.SNssais = &a
+    }
+
+    // nsiList
+    if nfprofile.NsiList != nil {
+        // fmt.Println("NsiList")
+        a := make([]string, len(nfprofile.NsiList))
+        for i := 0; i < len(nfprofile.NsiList); i++ {
+            a[i] = (nfprofile.NsiList)[i]
+        }
+        nf.NsiList = a
+    }
+    // allowedPlmns
+    if nfprofile.AllowedPlmns != nil {
+        a := make([]models.PlmnId, len(*nfprofile.AllowedPlmns))
+        for i := 0; i < len(*nfprofile.AllowedPlmns); i++ {
+            a[i] = (*nfprofile.AllowedPlmns)[i]
+        }
+        nf.AllowedPlmns = &a
+    }
+    // allowedNfTypes
+    if nfprofile.AllowedNfTypes != nil {
+        a := make([]models.NfType, len(nfprofile.AllowedNfTypes))
+        for i := 0; i < len(nfprofile.AllowedNfTypes); i++ {
+            a[i] = (nfprofile.AllowedNfTypes)[i]
+        }
+        nf.AllowedNfTypes = a
+    }
+    // allowedNfDomains
+    if nfprofile.AllowedNfDomains != nil {
+        a := make([]string, len(nfprofile.AllowedNfDomains))
+        for i := 0; i < len(nfprofile.AllowedNfDomains); i++ {
+            a[i] = (nfprofile.AllowedNfDomains)[i]
+        }
+        nf.AllowedNfDomains = a
+    }
+
+    // allowedNssais
+    if nfprofile.AllowedNssais != nil {
+        // fmt.Println("SNssais")
+        a := make([]models.Snssai, len(*nfprofile.AllowedNssais))
+        for i := 0; i < len(*nfprofile.AllowedNssais); i++ {
+            a[i] = (*nfprofile.AllowedNssais)[i]
+        }
+        nf.AllowedNssais = &a
+    }
+    // Priority
+    if nfprofile.Priority > 0 && nfprofile.Priority <= 65535 {
+        nf.Priority = nfprofile.Priority
+    }
+    // Capacity
+    if nfprofile.Capacity > 0 && nfprofile.Capacity <= 65535 {
+        nf.Capacity = nfprofile.Capacity
+    }
+    // Load
+    if nfprofile.Load > 0 && nfprofile.Load <= 100 {
+        nf.Load = nfprofile.Load
+    }
+    // Locality
+    if nfprofile.Locality != "" {
+        nf.Locality = nfprofile.Locality
+    }
+    // udrInfo
+    if nfprofile.UdrInfo != nil {
+        var a models.UdrInfo
+
+        if nfprofile.UdrInfo.GroupId != "" {
+            a.GroupId = nfprofile.UdrInfo.GroupId
+        }
+
+        if nfprofile.UdrInfo.SupiRanges != nil {
+            a.SupiRanges = nfprofile.UdrInfo.SupiRanges
+        }
+
+        if nfprofile.UdrInfo.GpsiRanges != nil {
+            a.GpsiRanges = nfprofile.UdrInfo.GpsiRanges
+        }
+
+        if nfprofile.UdrInfo.ExternalGroupIdentifiersRanges != nil {
+            a.ExternalGroupIdentifiersRanges = nfprofile.UdrInfo.ExternalGroupIdentifiersRanges
+        }
+
+        if nfprofile.UdrInfo.SupportedDataSets != nil {
+            a.SupportedDataSets = nfprofile.UdrInfo.SupportedDataSets
+        }
+
+        nf.UdrInfo = &a
+    }
+    // udmInfo
+    if nfprofile.UdmInfo != nil {
+        var a models.UdmInfo
+
+        if nfprofile.UdmInfo.GroupId != "" {
+            a.GroupId = nfprofile.UdmInfo.GroupId
+        }
+
+        if nfprofile.UdmInfo.SupiRanges != nil {
+            a.SupiRanges = nfprofile.UdmInfo.SupiRanges
+        }
+
+        if nfprofile.UdmInfo.GpsiRanges != nil {
+            a.GpsiRanges = nfprofile.UdmInfo.GpsiRanges
+        }
+
+        if nfprofile.UdmInfo.ExternalGroupIdentifiersRanges != nil {
+            a.ExternalGroupIdentifiersRanges = nfprofile.UdmInfo.ExternalGroupIdentifiersRanges
+        }
+
+        if nfprofile.UdmInfo.RoutingIndicators != nil {
+            a.RoutingIndicators = nfprofile.UdmInfo.RoutingIndicators
+        }
+
+        nf.UdmInfo = &a
+    }
+    // ausfInfo
+    if nfprofile.AusfInfo != nil {
+        var a models.AusfInfo
+
+        if nfprofile.AusfInfo.GroupId != "" {
+            a.GroupId = nfprofile.AusfInfo.GroupId
+        }
+
+        if nfprofile.AusfInfo.SupiRanges != nil {
+            a.SupiRanges = nfprofile.AusfInfo.SupiRanges
+        }
+
+        if nfprofile.AusfInfo.RoutingIndicators != nil {
+            a.RoutingIndicators = nfprofile.AusfInfo.RoutingIndicators
+        }
+
+        nf.AusfInfo = &a
+    }
+    // amfInfo
+    if nfprofile.AmfInfo != nil {
+        var a models.AmfInfo
+
+        if nfprofile.AmfInfo.AmfSetId != "" {
+            a.AmfSetId = nfprofile.AmfInfo.AmfSetId
+        }
+
+        if nfprofile.AmfInfo.AmfRegionId != "" {
+            a.AmfRegionId = nfprofile.AmfInfo.AmfRegionId
+        }
+
+        if nfprofile.AmfInfo.GuamiList != nil {
+            a.GuamiList = nfprofile.AmfInfo.GuamiList
+        }
+
+        if nfprofile.AmfInfo.TaiList != nil {
+            a.TaiList = nfprofile.AmfInfo.TaiList
+        }
+
+        if nfprofile.AmfInfo.TaiRangeList != nil {
+            a.TaiRangeList = nfprofile.AmfInfo.TaiRangeList
+        }
+
+        if nfprofile.AmfInfo.BackupInfoAmfFailure != nil {
+            a.BackupInfoAmfFailure = nfprofile.AmfInfo.BackupInfoAmfFailure
+        }
+
+        if nfprofile.AmfInfo.BackupInfoAmfRemoval != nil {
+            a.BackupInfoAmfRemoval = nfprofile.AmfInfo.BackupInfoAmfRemoval
+        }
+
+        if nfprofile.AmfInfo.N2InterfaceAmfInfo != nil {
+            a.N2InterfaceAmfInfo = nfprofile.AmfInfo.N2InterfaceAmfInfo
+        }
+        nf.AmfInfo = &a
+    }
+    // smfInfo
+    if nfprofile.SmfInfo != nil {
+        var a models.SmfInfo
+
+        if nfprofile.SmfInfo.SNssaiSmfInfoList != nil {
+            a.SNssaiSmfInfoList = nfprofile.SmfInfo.SNssaiSmfInfoList
+        }
+        if nfprofile.SmfInfo.TaiList != nil {
+            a.TaiList = nfprofile.SmfInfo.TaiList
+        }
+        if nfprofile.SmfInfo.TaiRangeList != nil {
+            a.TaiRangeList = nfprofile.SmfInfo.TaiRangeList
+        }
+        if nfprofile.SmfInfo.PgwFqdn != "" {
+            a.PgwFqdn = nfprofile.SmfInfo.PgwFqdn
+        }
+        if nfprofile.SmfInfo.AccessType != nil {
+            a.AccessType = nfprofile.SmfInfo.AccessType
+        }
+        nf.SmfInfo = &a
+    }
+    // upfInfo
+    if nfprofile.UpfInfo != nil {
+        var a models.UpfInfo
+
+        if nfprofile.UpfInfo.SNssaiUpfInfoList != nil {
+            a.SNssaiUpfInfoList = nfprofile.UpfInfo.SNssaiUpfInfoList
+        }
+        if nfprofile.UpfInfo.SmfServingArea != nil {
+            a.SmfServingArea = nfprofile.UpfInfo.SmfServingArea
+        }
+        if nfprofile.UpfInfo.InterfaceUpfInfoList != nil {
+            a.InterfaceUpfInfoList = nfprofile.UpfInfo.InterfaceUpfInfoList
+        }
+
+        a.IwkEpsInd = nfprofile.UpfInfo.IwkEpsInd
+
+        nf.UpfInfo = &a
+    }
+    // pcfInfo
+    if nfprofile.PcfInfo != nil {
+        var a models.PcfInfo
+
+        if nfprofile.PcfInfo.DnnList != nil {
+            a.DnnList = nfprofile.PcfInfo.DnnList
+        }
+        if nfprofile.PcfInfo.SupiRanges != nil {
+            a.SupiRanges = nfprofile.PcfInfo.SupiRanges
+        }
+        if nfprofile.PcfInfo.RxDiamHost != "" {
+            a.RxDiamHost = nfprofile.PcfInfo.RxDiamHost
+        }
+        if nfprofile.PcfInfo.RxDiamRealm != "" {
+            a.RxDiamRealm = nfprofile.PcfInfo.RxDiamRealm
+        }
+        nf.PcfInfo = &a
+    }
+    // bsfInfo
+    if nfprofile.BsfInfo != nil {
+        var a models.BsfInfo
+
+        if nfprofile.BsfInfo.DnnList != nil {
+            a.DnnList = nfprofile.BsfInfo.DnnList
+        }
+        if nfprofile.BsfInfo.IpDomainList != nil {
+            a.IpDomainList = nfprofile.BsfInfo.IpDomainList
+        }
+        if nfprofile.BsfInfo.Ipv4AddressRanges != nil {
+            b := make([]models.Ipv4AddressRange, len(*nfprofile.BsfInfo.Ipv4AddressRanges))
+            for i := 0; i < len(*nfprofile.BsfInfo.Ipv4AddressRanges); i++ {
+                b[i].Start = strconv.Itoa(int(Ipv4ToInt((*nfprofile.BsfInfo.Ipv4AddressRanges)[i].Start)))
+                b[i].End = strconv.Itoa(int(Ipv4ToInt((*nfprofile.BsfInfo.Ipv4AddressRanges)[i].End)))
+            }
+            a.Ipv4AddressRanges = &b
+        }
+        if nfprofile.BsfInfo.Ipv6PrefixRanges != nil {
+            b := make([]models.Ipv6PrefixRange, len(*nfprofile.BsfInfo.Ipv6PrefixRanges))
+            for i := 0; i < len(*nfprofile.BsfInfo.Ipv6PrefixRanges); i++ {
+                b[i].Start = Ipv6ToInt(((*nfprofile.BsfInfo.Ipv6PrefixRanges)[i].Start)).String()
+                b[i].End = Ipv6ToInt(((*nfprofile.BsfInfo.Ipv6PrefixRanges)[i].End)).String()
+            }
+            a.Ipv6PrefixRanges = &b
+        }
+        nf.BsfInfo = &a
+    }
+    // chfInfo
+    if nfprofile.ChfInfo != nil {
+        var a models.ChfInfo
+
+        if nfprofile.ChfInfo.SupiRangeList != nil {
+            a.SupiRangeList = nfprofile.ChfInfo.SupiRangeList
+        }
+        if nfprofile.ChfInfo.GpsiRangeList != nil {
+            a.GpsiRangeList = nfprofile.ChfInfo.GpsiRangeList
+        }
+        if nfprofile.ChfInfo.PlmnRangeList != nil {
+            a.PlmnRangeList = nfprofile.ChfInfo.PlmnRangeList
+        }
+        nf.ChfInfo = &a
+    }
+    // nrfInfo
+    if nfprofile.NrfInfo != nil {
+        nf.NrfInfo = nfprofile.NrfInfo
+    }
+    // recoveryTime
+    if nfprofile.RecoveryTime != nil {
+        // Update when restart (Setting by NF itself)
+        nf.RecoveryTime = nfprofile.RecoveryTime
+    }
+
+    // nfServicePersistence
+    if nfprofile.NfServicePersistence {
+        nf.NfServicePersistence = true
+    } else {
+        nf.NfServicePersistence = false
+    }
+
+    // nfServices
+    if nfprofile.NfServices != nil {
+        a := make([]models.NfService, len(*nfprofile.NfServices))
+        for i := 0; i < len(*nfprofile.NfServices); i++ {
+            a[i] = (*nfprofile.NfServices)[i]
+        }
+        nf.NfServices = &a
+    }
+    //
+}
+
+
+
+
