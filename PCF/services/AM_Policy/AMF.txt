@@ -1,0 +1,1187 @@
+Date : 26/9/2023
+Namf_Communication
+service UEContextTransfer
+RegistrationStatusUpdate 
+CreateUEContext
+Doc number : ETSI TS 129 518 V15.1.0 (2018-10)
+
+
+
+N1 interface :
+N1 : Between UE and AMF (The N1 interface is used by the UE for non-radio signaling mainly NAS layer signaling.)
+N2: Between gNB and AMF
+N1/N2 : between gNB and AMF (supporting UE and non-UE related services.)
+and 3) both are valid between gNB and AMF.
+
+
+
+Namf_Communication Service
+
+
+
+
+
+Service Description:
+This service enables an NF to communicate with the UE through N1 NAS messages or with the AN (both UE and non UE specific). 
+AN :- access network .
+The service operations defined below allow the NF to communicate with the UE and the AN. 
+The following are the key functionalities of this NF service. 
+- Provide service operations for transporting N1 messages to the UE; 
+- Allow NFs to subscribe and unsubscribe for notifications of specific N1 messages from the UE; 
+- Allow NFs to subscribe and unsubscribe for notifications about specific information from AN; 
+- Provide service operations for initiating N2 messages towards the AN; 
+- Security Context Management; and 
+- UE information management and transfer (including its security context).
+
+
+
+
+Service Operations :
+- UEContextTransfer
+- RegistrationStatusUpdate 
+- N1N2MessageTransfer (UE Specific) 
+- N1N2TransferFailureNotification (UE Specific) 
+- N1N2MessageSubscribe (UE Specific) 
+- N1N2MessageUnsubscribe (UE Specific)
+- N1MessageNotify (UE Specific) 
+- N2InfoNotify (UE Specific) 
+- NonUeN2MessageTransfer 
+- NonUeN2InfoSubscribe 
+- NonUeN2INfoUnsubscribe 
+- N2InfoNotify 
+- EBIAssignment 
+- CreateUEContext 
+- ReleaseUEContext 
+- AMFStatusChangeSubscribe 
+- AMFStatusChangeUnsubscribe 
+- AMFStatusChangeNotify
+
+
+UE Context Operations
+				
+
+
+
+UEContextTransfer 
+
+
+
+            {
+		"UEContextTransfer",
+		strings.ToUpper("Post"),
+		"/ue-contexts/:ueContextId/transfer",
+		HTTPUEContextTransfer,
+	},
+Why post request in the above operation…?
+Data Structure: In a POST request, the data (UE context) can be structured in the body of the request. This allows for flexibility in the format and structure of the data being transferred. The UE context data can be serialized in a suitable format (e.g., JSON, XML) and included in the POST request's body, making it easy to transmit complex data structures.
+
+
+
+
+The UEContextTransfer service operation is used during the following procedure: - General Registration procedure (see 3GPP TS 23.502 [3], subclause 4.2.2.2.2) 
+The UEContextTransfer service operation is invoked(call by the ) by a NF Service Consumer, e.g. a target AMF, towards the AMF (acting as source AMF), 
+when the target AMF receives a Registration Request with the UE's 5G-GUTI included and the serving AMF has changed since last registration, to retrieve the UE Context, 
+e.g. the UE's SUPI and MM Context, in the source AMF. 
+The NF Service Consumer (e.g. the target AMF) shall retrieve the UE Context by invoking the "transfer" custom method on the URI of an "Individual ueContext" resource identified by UE's 5G-GUTI, see subclause 6.1.3.2.4. See also Figure 5.2.2.2.1.1-1. 
+
+NF Service Consumer(amf)    ----------------------------------------------------------	AMF
+POST …/ue-contexts/{ueContextId}/transfer (UeContextTransferReqData)------------>  [1]
+   <----------2a. 200 OK (UeContextTransferRspData)                                                          [2.a]
+   <----------2b. 4xx/5xx (ProblemDetails) or 3xx						 [2.b]	
+
+1. The NF Service Consumer, e.g. target AMF, shall send a HTTP POST request to invoke "transfer" custom method on an "Individual ueContext" resource URI. 
+The payload of the request shall be an object of "UeContextTranferReqData" data type. 
+If UE Context Transfer is triggered by UE initial registration or mobility registration, the NF Service Consumer, e.g. target AMF, shall set the reason attribute to "INIT_REG" or "MOBI_REG" and include the integrity protected registration request message which triggers the UE context transfer in the payload.
+
+
+
+
+
+Structure came from the consumer:
+
+
+type UeContextTransferRequest struct {
+	JsonData            *UeContextTransferReqData `json:"jsonData,omitempty" multipart:"contentType:application/json"`
+	BinaryDataN1Message []byte                    `json:"binaryDataN1Message,omitempty" multipart:"contentType:application/vnd.3gpp.5gnas,ref:JsonData.RegRequest.N1MessageContent.ContentId"`
+}
+type UeContextTransferReqData struct {
+    Reason            TransferReason      `json:"reason"`
+    AccessType        AccessType          `json:"accessType"`
+    PlmnId            *PlmnId             `json:"plmnId,omitempty"`
+    RegRequest        *N1MessageContainer `json:"regRequest,omitempty"`
+    SupportedFeatures string              `json:"supportedFeatures,omitempty"`
+}
+
+type TransferReason string
+
+// List of TransferReason
+const (
+    TransferReason_INIT_REG              TransferReason = "INIT_REG"
+    TransferReason_MOBI_REG              TransferReason = "MOBI_REG"
+    TransferReason_MOBI_REG_UE_VALIDATED TransferReason = "MOBI_REG_UE_VALIDATED"
+)
+
+type AccessType string
+
+// List of AccessType
+const (
+    AccessType__3_GPP_ACCESS    AccessType = "3GPP_ACCESS"
+    AccessType_NON_3_GPP_ACCESS AccessType = "NON_3GPP_ACCESS"
+)
+type PlmnId struct {
+    Mcc string `json:"mcc" yaml:"mcc" bson:"mcc" mapstructure:"Mcc"`
+    Mnc string `json:"mnc" yaml:"mnc" bson:"mnc" mapstructure:"Mnc"`
+}
+
+
+
+
+type N1MessageContainer struct {
+    N1MessageClass   N1MessageClass   `json:"n1MessageClass"`
+    N1MessageContent *RefToBinaryData `json:"n1MessageContent"`
+    NfId             string           `json:"nfId,omitempty"`
+}
+type N1MessageClass string
+
+// List of N1MessageClass
+const (
+    N1MessageClass__5_GMM N1MessageClass = "5GMM"
+    N1MessageClass_SM     N1MessageClass = "SM"
+    N1MessageClass_LPP    N1MessageClass = "LPP"
+    N1MessageClass_SMS    N1MessageClass = "SMS"
+    N1MessageClass_UPDP   N1MessageClass = "UPDP"
+)
+
+
+type RefToBinaryData struct {
+    ContentId string `json:"contentId"`
+}
+
+
+
+2a. On success: 
+- if the reason attribute is "INIT_REG" and integrity check is successful, the (source) AMF shall respond with the status code "200 OK". 
+- he payload of the response shall be an object of "UeContextTransferRspData" data type, containing the representation of the requested UE Context without PDU Session Contexts. 
+
+
+- If the reason attribute is "MOBI_REG" and integrity check is successful, the (source) AMF shall respond with the status code "200 OK". 
+- The payload of the response shall be an object of "UeContextTransferRspData" data type, containing the representation of the complete UE Context including available PDU Session Contexts. 
+The UE context shall contain trace control and configuration parameters, if signalling based trace has been activated (see 3GPP TS 32.422 [30]). 
+
+The NF Service Consumer, e.g. target AMF, starts tracing according to the received trace control and configuration parameters, if trace data is received in the UE context indicating that signalling based trace has been activated.
+Once the NF Service Consumer receives subscription data, trace requirements received from the UDM supersedes the trace requirements received from the AMF. 
+
+
+
+2b. On failure or redirection, 
+one of the HTTP status code listed in Table 6.1.3.2.4.4.2-2 shall be returned. 
+For a 4xx/5xx response, the message body shall contain a ProblemDetails structure with the "cause" attribute set to one of the application error listed in Table 6.1.3.2.4.4.2-2. 
+				RegistrationStatusUpdate 
+
+The RegistrationStatusUpdate service operation is used during the following procedure: 
+- General Registration procedure (see 3GPP TS 23.502 [3], subclause 4.2.2.2.2) 
+- Registration with AMF re-allocation procedure (see 3GPP TS 23.502 [3], subclause 4.2.2.2.3) 
+
+
+The RegistrationStatusUpdate service operation is invoked by a NF Service Consumer, e.g. the target AMF, towards the NF Service Producer, i.e. the source AMF, to update the status of UE registration at the target AMF, thereby indicating the result of previous UE Context transfer for a given UE (see subclause 5.2.2.2.1.1). 
+The target AMF shall update the NF Service Producer (i.e. source AMF) the status of the UE registration at the target AMF due to a previous UE Context transfer. The NF Service Consumer (e.g. target AMF) shall use the HTTP method POST to invoke the "transfer-update" custom operation on the URI of an "Individual ueContext" resource, see subclause 6.1.3.2.4. See also Figure 5.2.2.2.2.1-1. 
+
+
+
+(EX: PCF)SOURCE (CONSUMER) ----HTTP METHOD(TRANUP)----- (AMF)DISTINATION(PRODUCER)
+POST …/ue-contexts/{ueContextId}/transferupdate (UeRegStatusUpdateReqData)-------------> [1]
+←—-------------------2a. 200 OK (UeRegStatusUpdateRspData)					  [2A]
+←—-------------------2b. 4xx/5xx (ProblemDetails)                                                                               [2B]
+
+
+
+1. The NF service consumer (e.g. target AMF), shall send a POST request to invoke the "transfer-update" custom operation on the URI of an "Individual ueContext" resource, to update the source AMF of the status of the UE registration at the target AMF. 
+The UE's 5G-GUTI is included as the UE identity.
+If any network slice(s) become no longer available and there are PDU Session(s) associated with them, the target AMF shall include these PDU session(s) in the to ReleaseSessionList attribute in the payload. 
+Once the update is received, the source AMF shall: 
+- remove the individual ueContext resource and release any PDU session(s) in the toReleaseSessionList attribute, if the transferStatus attribute included in the POST request body is set to "TRANSFERRED". 
+The source AMF may choose to start a timer to supervise the release of the UE context resource and may keep the individual ueContext resource until the timer expires. 
+- shall keep the UE Context as if the context transfer procedure had not happened if the transferStatus attribute included in the POST request body is set to "NOT_TRANSFERRED". 
+
+2a. On Success: The source AMF shall respond with the status code "200 OK" if the request is accepted.
+2b. On failure, one of the HTTP status code listed in Table 6.1.3.2.4.5.2-2 shall be returned. For a 4xx/5xx response, the message body shall contain a ProblemDetails structure with the "cause" attribute set to one of the application error listed in Table 6.1.3.2.4.5.2-2, where applicable.
+
+
+
+
+{
+        "RegistrationStatusUpdate",
+        strings.ToUpper("Post"),
+        "/ue-contexts/:ueContextId/transfer-update",
+        HTTPRegistrationStatusUpdate,
+    },
+
+
+
+
+
+				CreateUEContext  
+
+
+
+
+        "CreateUEContext",
+        strings.ToUpper("Put"),
+        "/ue-contexts/:ueContextId",
+        HTTPCreateUEContext,
+    },
+
+The CreateUEContext service operation is used during the following procedure: 
+
+- Inter NG-RAN node N2 based handover (see 3GPP TS 23.502 [3], clause 4.9.1.3, and clause 4.23.7) 
+- EPS to 5GS handover procedure using N26 interface (see 3GPP TS 23.502 [3], clause 4.11.1.2.2) 
+- 5G-SRVCC procedure from NG-RAN to UTRAN (see 3GPP TS 23.216 [39], clause 6.5) 
+
+
+The CreateUEContext service operation is invoked by a NF Service Consumer, 
+
+e.g. a source AMF, towards the AMF (acting as target AMF), when the source AMF can't serve the UE and selects the target AMF during the handover procedure, to create the UE Context in the target AMF. 
+
+The NF Service Consumer (e.g. the source AMF) shall create the UE Context by using the HTTP PUT method with the URI of the "Individual UeContext" resource (See clause 6.1.3.2.3.1). See also Figure 5.2.2.2.3.1-1. 
+
+
+
+
+HANDOVER PROCEDURE:
+Handover procedures in 5GS are used to hand over a UE from a source NG-RAN node to a target NG-RAN node. Like EPS, handover procedures are available both with and without Control Plane connection between source and target NG-RAN nodes.
+
+
+	New amf 						old amf 
+(amf)Source[consumer]                                                (AMF)destination[producer]
+1. PUT …/ue-contexts/{ueContextId}(UeContextCreateData)------------>		[1]
+      <---------------- 201 Created (UeContextCreatedData) 
+      ←—------------2b. 4xx/5xx (UeContextCreateError) or 3xx
+
+Can’t serve the ue and selects the target amf during the handover procedure 
+
+
+1. The NF Service Consumer, e.g. source AMF, shall send a PUT[update] request, to create the ueContext in the target AMF. 
+type UeContextCreateData struct {
+    UeContext          *UeContext        `json:"ueContext"`
+    TargetId           *NgRanTargetId    `json:"targetId"`
+    SourceToTargetData *N2InfoContent    `json:"sourceToTargetData"`
+    PduSessionList     []N2SmInformation `json:"pduSessionList,omitempty"`
+    N2NotifyUri        string            `json:"n2NotifyUri,omitempty"`
+    UeRadioCapability  *N2InfoContent    `json:"ueRadioCapability,omitempty"`
+    NgapCause          *NgApCause        `json:"ngapCause,omitempty"`
+    SupportedFeatures  string            `json:"supportedFeatures,omitempty"`
+}
+The payload body of the PUT request shall contain a UeContextCreateData structure, including a N2 Information Notification callback URI.
+The UE context shall contain trace control and configuration parameters, if signaling based trace has been activated (see 3GPP TS 32.422 [30]). 
+EPC :Evolved Packet Core unifies voice and data on an Internet Protocol (IP ) service architecture and voice is treated as just another IP application.
+For EPS to 5GS Mobility procedure, the NF Service Consumer, i.e. initial AMF, shall carry the S-NSSAI for serving PLMN, and MME Control Plane Address and TEID in the request. 
+In Home Routed roaming case, the SNSSAI for serving PLMN is derived by the initial AMF based on the S-NSSAI for home PLMN retrieved from SMF+PGW-C, as specified in 3GPP TS 23.502 [3]. 
+For 5G-SRVCC procedure from NG-RAN to UTRAN, the NF Service Consumer (i.e. AMF) carries the Mobile Station Classmark 2, STN-SR, C-MSISDN and Supported Codec List in the request, as specified in 3GPP TS 23.502 [3]. 
+
+2a. On success, the target AMF shall respond with the status code "201 Created" if the request is accepted, together with a HTTP Location header to provide the location of a newly created resource. 
+The payload body of the PUT response shall contain the representation of the created UE Context. 
+If the target AMF selects a new PCF for AM Policy other than the one which was included in the UeContext by the old AMF, the target AMF shall set pcfReselectionInd to true. 
+If the pcfReselectionInd is set to true, the source AMF shall terminate the AM Policy Association to the old PCF. 
+The target AMF starts tracing according to the received trace control and configuration parameters, if trace data is received in the UE context indicating that signalling based trace has been activated. 
+Once the AMF receives subscription data, trace requirements received from the UDM supersedes the trace requirements received from the NF Service Consumer. 
+The UE context shall contain event subscriptions information in the following cases: 
+a) Any NF Service Consumer has subscribed for UE specific event; and/or 
+b) Any NF Service Consumer has subscribed for UE group specific events to which the UE belongs. 
+In this case the event subscriptions provided in the UE context shall contain the event details applicable to this specific UE in the group (e.g maxReports in options IE). 
+The target AMF shall: 
+- in case a) create event subscriptions for the UE specific events; 
+- in case b) create event subscriptions for the group Id if there are no existing event subscriptions for that group Id, subscription change notification URI (subsChangeNotifyUri) and the subscription change notification correlation Id (subsChangeNotifyCorrelationId). 
+If there is already an existing event subscription for the group Id and for the given subscription change notification URI (subsChangeNotifyUri) and subscription Id change notification correlation Id (subsChangeNotifyCorrelationId), then an event subscription shall not be created at the target AMF. 
+The individual UE specific event details (e.g maxReports in options IE) within that group shall be taken into account. - for both the cases, for each created event subscription, allocate a new subscription Id, if necessary (see clause 6.5.2 of 3GPP TS 29.500 [4]), and if allocated send the new subscription Id to the notification endpoint for informing the subscription Id creation, along with the notification correlation Id for the subscription Id change. 
+
+NOTE: Subscription Id can be reused if the mobility is between AMFs of same AMF Set. 
+
+If the UE context being transferred from the NF service consumer (e.g. source AMF) is the last UE context that belongs to a UE group Id related subscription, then the NF service consumer (e.g. source AMF) shall not delete the UE group Id related subscription until the expiry of that event subscription (see clause 5.3.2.2.2). 
+The source AMF, shall: 
+- release those PDU sessions not supported by the target AMF and thus not transferred to the target AMF. 
+2b. On failure or redirection, one of the HTTP status code listed in Table 6.1.3.2.3.1-3 shall be returned. For a 4xx/5xx response, the message body shall contain a UeContextCreateError structure, including: - a ProblemDetails structure with the "cause" attribute set to one of the application errors listed in Table 6.1.3.2.3.1-3; - NgAPCause, if available; - N2 information carrying the Target to Source Failure Transparent Container, if this information has been received from the target NG-RAN and if the source AMF supports the NPN feature.
+
+
+		SOURCE AND DESTINATION FOR THE UE CONTEXT CREATE
+
+
+Source: The "source" network element refers to the entity that is initiating the UE context creation or transfer. In the case of the CreateUEContext procedure, this source entity could be one of the following:
+Source AMF (Access and Mobility Management Function): In a network handover scenario, the source AMF is the entity that currently manages the UE's context and is responsible for initiating the transfer of that context to a new target AMF.
+UPF (User Plane Function): In the context of UPF change or modification, the source UPF may initiate the creation or transfer of the UE context to another UPF.
+Other Network Functions: Depending on the specific scenario and the Free5GC architecture, other network functions could also act as the source for UE context creation or transfer.
+Destination: The "destination" network element refers to the entity that is intended to receive the UE context or where the new UE context is being created. In the CreateUEContext procedure, the destination entity could be one of the following:
+Target AMF: In the case of a network handover, the target AMF is the entity that will take over the management of the UE's context. The source AMF initiates the context transfer to the target AMF, making it the destination.
+New UPF: If a new UPF is being introduced or assigned to the UE for user plane data handling, that UPF becomes the destination where the UE context is created or transferred to.
+Other Network Functions: Similar to the source, other network functions could also serve as the destination for UE context creation or transfer, depending on the network's architecture and requirements.
+Source: The "source" network element refers to the entity that is initiating the UE context creation or transfer. In the case of the CreateUEContext procedure, this source entity could be one of the following:
+Source AMF (Access and Mobility Management Function): In a network handover scenario, the source AMF is the entity that currently manages the UE's context and is responsible for initiating the transfer of that context to a new target AMF.
+UPF (User Plane Function): In the context of UPF change or modification, the source UPF may initiate the creation or transfer of the UE context to another UPF.
+Other Network Functions: Depending on the specific scenario and the Free5GC architecture, other network functions could also act as the source for UE context creation or transfer.
+Destination: The "destination" network element refers to the entity that is intended to receive the UE context or where the new UE context is being created. In the CreateUEContext procedure, the destination entity could be one of the following:
+Target AMF: In the case of a network handover, the target AMF is the entity that will take over the management of the UE's context. The source AMF initiates the context transfer to the target AMF, making it the destination.
+New UPF: If a new UPF is being introduced or assigned to the UE for user plane data handling, that UPF becomes the destination where the UE context is created or transferred to.
+Other Network Functions: Similar to the source, other network functions could also serve as the destination for UE context creation or transfer, depending on the network's architecture and requirements.
+
+
+
+
+
+					ReleaseUEContext
+
+
+
+
+
+The ReleaseUEContext service operation is used during the following procedure: 
+- Inter NG-RAN node N2 based handover, Cancel procedure (see 3GPP TS 23.502 [3], clause 4.9.1.4) 
+The ReleaseUEContext service operation is invoked by a NF Service Consumer, e.g. a source AMF, towards the AMF (acting as target AMF), when the source AMF receives the “”Handover Cancel””  from the 5G-AN during the handover procedure, to release the UE Context in the target AMF. 
+The NF Service Consumer (e.g. the source AMF) shall release the UE Context by using the HTTP "release" custom operation with the URI of the "Individual UeContext" resource (See clause 6.1.3.2.4.2). See also Figure 5.2.2.2.4.1-1.
+
+
+
+
+(source)Target[NEW amf]                                               (target)Source[OLD amf]
+Post…/ue-contexts/{ueContextId}/release(Data) ------------>		[1]
+      <---------------- 204 No Content                                                                [2a]
+      ←—------------4xx/5xx (ProblemDetails) or 3xx                                     [2b]
+
+
+1. The NF Service Consumer, e.g. source AMF, shall send a POST request, to release the ueContext in the target AMF.
+The payload body of the POST request shall contain any data that needs to be passed to the target AMF. 
+2a. On success, the target AMF shall return "204 No Content" with an empty payload body in the POST response. 
+2b. On failure or redirection, one of the HTTP status code listed in Table 6.1.3.2.4.2.2-2 shall be returned. For a 4xx/5xx response, the message body shall contain a ProblemDetails structure with the "cause" attribute set to one of the application error listed in Table 6.1.3.2.4.2.2-2. 
+
+
+
+
+UE Specific N1N2 Message Operations 
+
+
+
+ 					
+
+
+
+N1N2MessageTransfer
+
+
+
+
+
+
+
+The N1N2MessageTransfer service operation is used by a NF Service Consumer to transfer N1 and/or N2 information to the UE and/or 5G-AN through the AMF in the following procedures: 
+- Network triggered Service Request (see clause 4.2.3.3 of 3GPP TS 23.502 [3]) - PDU Session establishment (see clause 4.3.2 of 3GPP TS 23.502 [3]) - PDU Session modification (see clause 4.3.3 of 3GPP TS 23.502 [3]) - PDU Session release (see clause 4.3.4 of TS 3GPP 23.502 [3]) - Session continuity, service continuity and UP path management (see clause 4.3.5 of 3GPP TS 23.502 [3]) - Inter NG-RAN node N2 based handover (see clause 4.9.1.3 of 3GPP TS 23.502 [3]) - SMS over NAS procedures (see clause 4.13.3 of 3GPP TS 23.502 [3] - UE assisted and UE based positioning procedure (see clause 6.11.1 of 3GPP TS 23.273 [42]) - Network assisted positioning procedure (see clause 6.11.2 of 3GPP TS 23.273 [42]) - LCS Event Report, LCS Cancel Location and LCS Periodic-Triggered Invoke procedures (see clause 6.3 of 3GPP TS 23.273 [42]) - UE configuration update procedure for transparent UE policy delivery (see clause 4.2.4.3 of 3GPP TS 23.502 [3]) - UPF anchored Mobile Terminated Data Transport in Control Plane CIoT 5GS Optimisation (see clause 4.24.2 of 3GPP TS 23.502 [3]) - NEF Anchored Mobile Terminated Data Transport (see clause 4.25.5 of 3GPP TS 23.502 [3]) - System interworking procedures with EPC (see clause 4.3 in 3GPP TS 23.501 [2] and clause 4.11 in 3GPP TS 23.502 [3]) - SMF triggered N3 data transfer establishment procedure (see clause 4.2.10.2 of 3GPP TS 23.502 [3]) - 5G-RG requested PDU Session Establishment via W-5GAN (see clause 7.3.1 of 3GPP TS 23.316 [48])
+
+
+- 5G-RG or Network requested PDU Session Modification via W-5GAN (see clause 7.3.2 of 3GPP TS 23.316 [48]) - 5G-RG or Network requested PDU Session Release via W-5GAN (see clause 7.3.3 of 3GPP TS 23.316 [48]) - FN-RG related PDU Session Establishment via W-5GAN (see clause 7.3.4 of 3GPP TS 23.316 [48]) - CN-initiated selective deactivation of UP connection of an existing PDU Session associated with W-5GAN Access (see clause 7.3.5 of 3GPP TS 23.316 [48]) - FN-RG or Network Requested PDU Session Modification via W-5GAN (see clause 7.3.6 of 3GPP TS 23.316 [48]) - FN-RG or Network Requested PDU Session Release via W-5GAN (see clause 7.3.7 of 3GPP TS 23.316 [48]) - Non-5G capable device behind 5G-CRG and FN-CRG requested PDU Session Establishment via W-5GAN (see clause 4.10a of 3GPP TS 23.316 [48]) - Non-5G capable device behind 5G-CRG and FN-CRG or Network Requested PDU Session Modification via W5GAN (see clause 4.10a of 3GPP TS 23.316 [48]) - Non-5G capable device behind 5G-CRG and FN-CRG or Network Requested PDU Session Release via W5GAN (see clause 4.10a of 3GPP TS 23.316 [48]) - Handover procedures between 3GPP access / 5GC and W-5GAN access (see clause 7.6.3 of 3GPP TS 23.316 [48]) - Handover from 3GPP access / EPS to W-5GAN / 5GC (see clause 7.6.4.1 of 3GPP TS 23.316 [48]) 
+
+
+
+NOTE: Though in 3GPP TS 23.502 [3] the procedure is called "UE configuration update procedure for transparent UE policy delivery", as per 3GPP TS 24.501 [11] clause 5.4.5.3.1, the network initiated NAS transport procedure is used. 
+
+
+The NF Service Consumer shall invoke the service operation by using HTTP method POST, to request the AMF to transfer N1 and/or N2 information for a UE and/or 5G-AN, with the URI of "N1 N2 Messages Collection" resource (see clause 6.1.3.5.3.1). 
+
+The NF Service Consumer may include the following information in the HTTP Request message body: 
+
+- SUPI 
+- PDU Session ID or LCS Correlation ID depending on the N1/N2 message class to be transferred 
+- N2 SM Information (PDU Session ID, QoS profile, CN N3 Tunnel Info, S-NSSAI) 
+- N1 Message Container, including a N1 SM, LPP message, LCS message, SMS, UPDP message 
+- N2 Information Container, including N2 SM, NRPPa message, PWS or RAN related information 
+- Mobile Terminated Data (i.e. CIoT user data container) 
+- Allocation and Retention Priority (ARP) 
+- Paging Policy Indication - 5QI 
+- Notification URL (used for receiving Paging Failure Indication) 
+- Last Message Indication 
+- NF Instance Identifier and optionally Service Instance Identifier of the NF Service Consumer (e.g. an LMF) 
+- N1 SM Skipping Indication 
+- Area of Validity for N2 SM Information
+- A MA PDU Session Accepted indication, if a MA-PDU session is established; 
+- Extended Buffering Support Indication, if SMF determines that Extended Buffering applies during Network triggered Service Request Procedure (see clause 4.2.3.3 of 3GPP TS 23.502 [3]), UPF anchored Mobile Terminated Data Transport in Control Plane CIoT 5GS Optimisation procedure (see clause 4.24.2 of 3GPP TS 23.502 [3]) or NEF Anchored Mobile Terminated Data Transport (see clause 4.25.5 of 3GPP TS 23.502 [3]);
+ 
+- Target Access type towards which the SMF requests to send N2 information and optionally N1 information, for a Multi-Access (MA) PDU session, or through which the LMF requests to transfer an LPP message to the UE. 
+
+
+NF Service Consumer							amf
+(source)Target[NEW amf]                                               (target)Source[OLD amf]
+                                                            Post ------------>		                      [1]
+      <---------------- 204 No Content                                                                [2a]
+      ←—------------4xx/5xx (ProblemDetails) or 3xx                                     [2b]
+
+
+1. The NF Service Consumer shall send a POST request to transfer N1 and N2 information. 
+The NF Service Consumer may include a N1N2MessageTransfer Notification URI to AMF in the request message. 
+
+
+2a. On success, i.e. if the request is accepted and the AMF is able to transfer the N1/N2 message to the UE and/or the AN, the AMF shall respond with a "200 OK" status code. The AMF shall set the cause IE in the N1N2MessageTransferRspData as "N1_N2_TRANSFER_INITIATED" in this case. 
+
+
+2b. On failure or redirection, one of the HTTP status code listed in Table 6.1.3.5.3.1-3 shall be returned. For a 4xx/5xx response, the message body shall contain a N1N2MessageTransferError structure, including: - a ProblemDetails structure with the "cause" attribute set to one of the application error listed in Table 6.1.3.5.3.1-3;
+
+				N1N2Transfer Failure Notification
+
+
+The AMF uses this notification to inform the NF service consumer that initiated an earlier Namf_Communication_N1N2MessageTransfer, that the AMF failed to deliver the N1 message to the UE as the UE failed to respond to paging. 
+
+The HTTP POST method shall be used on the notification callback URI provided by the NF service consumer as specified in clause 5.2.2.3.1.2. 
+
+		Amf —---------------Inform--------------->   nf service consumer 
+
+
+
+	AMF							CONSUMER
+
+	—---N1N2 message transfer failure notify URI—-->   [1]
+		<—----------204 no content—-------------------------
+
+
+Paging is a function of memory management where a computer will store and retrieve data from a device's secondary storage to the primary storage. 
+Memory management is a crucial aspect of any computing device, and paging specifically is important to the implementation of virtual memory.
+
+
+When the AMF determines that the paging or NAS Notification has failed, or that the indicated non-3GPP PDU session is not allowed to move to 3GPP access, or that the delivery of the N1 message fails e.g. in case the UE is in RRC Inactive and NG-RAN paging was not successful or in case an Xn or N2 handover is being triggered at the NG-RAN, and if the NF service consumer had provided a notification URI (see clause 5.2.2.3.1.2),
+the AMF shall send a POST request to the NF Service Consumer on that Notification URI. 
+
+The AMF shall include the N1N2MessageTransfer request resource URI returned earlier in the N1N2MessageTransfer response if any (see clause 5.2.2.3.1.2), otherwise a dummy URI (see clause 6.1.6.2.30), in the POST request body. 
+The AMF shall also include a N1/N2 message transfer cause information in the POST request body and set the value as specified in clause 6.1.5.6.3.1. 
+The NF Service Consumer shall delete any stored representation of the N1N2MessageTransfer request resource URI upon receiving this notification.
+
+ 2. The NF Service Consumer shall send a response with "204 No Content" status code. 
+
+
+
+
+
+					N1N2MessageSubscribe
+
+
+
+LPP (LTE Positioning Protocol): LPP is a protocol used for location-based services and positioning in LTE networks. It allows the network to determine the location of a mobile device (UE) accurately, either through GPS (Global Positioning System) or other positioning methods. LPP is designed to provide location information for services such as E911 emergency calls, location-based advertisements, and more.
+
+
+
+The N1N2MessageSubscribe service operation is used by a NF Service Consumer (e.g. PCF) to subscribe to the AMF for notifying N1 messages of a specific type (e.g. LPP) or N2 information of a specific type. 
+
+For the N1 message class is UPDP[User Plane Data Path], a PCF shall subscribe for the N1 ,message notification with the AMF after the AM policy association establishment procedure between the AMF and the PCF (see clause 4.16.1 of 3GPP TS 23.502 [3]). 
+
+NOTE: Step 0 of clause 4.2.4.3 of 3GPP TS 23.502 [3] specifies that the PCF can split the UPDP transfer towards UE into multiple units.
+
+ one UE specific callback URI is registered with the AMF by the PCF for the AMF to notify all UPDP message responses from the UE to the same callback URI. 
+
+As a result, an explicit subscription per UE policy association is defined in stage 3 for this purpose. 
+An NF Service Consumer (e.g. PCF) may subscribe to notifications of specific N1 message type (e.g. LPP or UPDP) or N2 information type. 
+In this case the NF Service Consumer shall subscribe by using the HTTP POST method with the URI of the "N1N2 Subscriptions Collection for Individual UE Contexts" resource (See clause 6.1.3.6.3.1). See also Figure 5.2.2.3.3.1-1. 
+
+
+
+
+	CONSUMER							AMF
+
+	—---Post /namf-comm/v1/ue-contexts{uecontextID}/N1-N2-mess—-->   [1]
+		<—----------204 no content—-------------------------
+
+1. The NF Service Consumer shall send a POST request to create a subscription resource in the AMF for a UE specific N1/N2 message notification. 
+The payload body of the POST request shall contain: - N1 and/or N2 Message Type, identifying the type of N1 and/or N2 message to be notified - A callback URI for the notification 
+2. If the request is accepted, the AMF shall include a HTTP Location header to provide the location of a newly created resource (subscription) together with the status code 201 indicating the requested resource is created in the response message.
+
+
+
+
+
+
+
+
+				N1N2MessageUnSubscribe 
+
+
+
+
+The N1N2MessageUnSubscribe service operation is used by a NF Service Consumer (e.g. PCF) to unsubscribe to the AMF to stop notifying N1 messages of a specific type (e.g. LPP or UPDP). 
+
+The NF Service Consumer shall use the HTTP method DELETE with the URI of the "N1N2 Individual Subscription" resource (See clause 6.1.3.7.3.1), to request the deletion of the subscription for the N1 / N2 message towards the AMF. See also Figure 5.2.2.3.4.1-1.
+
+
+
+
+
+NF Service Consumer       							amf
+
+—------1. DELETE ./namf_comm/v1/ue_contexts/{ueContextId}/n1-n2- messages/subscriptions/{subscriptionId}  —----------------------------------->
+←—---------------2. 204 No Content—--------------------------------------------
+
+
+
+1. The NF Service Consumer shall send a DELETE request to delete an existing subscription resource in the AMF. 
+2. If the request is accepted, the AMF shall reply with the status code 204 indicating the resource identified by subscription ID is successfully deleted, in the response message. 
+
+
+
+
+
+
+
+					N1MessageNotify  
+
+ —--amf/httpcallback
+
+
+
+
+The N1MessageNotify service operation is used by an AMF notifying the N1 message received from the UE to a destination CN NF[Core Network Network Function], and it is used in the following procedures: 
+
+- Registration with AMF re-allocation (see clause 4.2.2.2.3 of 3GPP TS 23.502 [3]) - UE assisted and UE based positioning procedure (see clause 6.11.1 of 3GPP TS 23.273 [42]) 
+
+- LCS Event Report, LCS Cancel Location and LCS Periodic-Triggered Invoke procedures (see clause 6.3 and clause 6.7 of 3GPP TS 23.273 [42]) 
+
+- UE configuration update procedure for transparent UE policy delivery (See clause 4.2.4.3 in 3GPP TS 23.502 [3]) 
+
+
+NOTE: Though in 3GPP TS 23.502 [3] the procedure is called "UE configuration update procedure for transparent UE policy delivery", as per 3GPP TS 24.501 [11] clause 5.4.5.2.1, the UE initiated NAS transport procedure is used. 
+
+The AMF shall use HTTP POST method to the N1 Notification URI provided by the NF Service Consumer via N1N2MessageSubscribe service operation (See clause 5.2.2.3.3). See also figure 5.2.2.3.5.1-1. 
+	AMF—----------------------------------------------------------------------------consumer
+	—-------POST {n1 notify callback uri}(N1 message notification)---------> [1]
+				via N1N2MessageSubscribe
+	←—---------------------204 No content—------------------------------		[2a]
+	←—---------------------4XX[5XX (problem details)]----------------		[2b]
+
+
+
+1. The AMF shall send a HTTP POST request to the N1 Notification URI, and the payload body of the POST request shall contain an N1MessageNotificatoin data structure with the subscribed N1 message. 
+
+
+2a. On success, "204 No Content" shall be returned and the payload body of the POST response shall be empty.
+
+
+2b. On failure, one of the HTTP status code listed in Table 6.1.5.6.4.1-2 shall be returned. The message body shall contain a ProblemDetails object with "cause" set to one of the corresponding application errors listed in Table 6.1.5.6.4.1-2. 
+
+
+
+
+
+Using N1MessageNotify in the Registration with AMF Re-allocation Procedure
+
+
+
+
+ In the Registration with AMF re-allocation procedure, the N1MessageNotify service operation is invoked by a NF Service Producer, i.e. an Initial AMF, towards a NF Service Consumer, e.g. the target AMF, which is selected to serve the UE, by the initial AMF. 
+
+The requirements specified in clause 5.2.2.3.5.1 shall apply with the following modifications: 
+
+
+1. The initial AMF discovers the NF Service Consumer (e.g. the target AMF) from the NRF, and fetch N1 Notification URI from the default notification subscription registered with "N1_MESSAGE" notification type and "5GMM" N1 message class (See Table 6.2.6.2.3-1 and Table 6.2.6.2.4-1 of 3GPP TS 29.510 [29]. 
+
+
+NOTE: The alternate AMF is expected to have registered a callback URI with the NRF.
+
+ 2. Same as step 1 of Figure 5.2.2.3.5.1-1, the request payload shall include the following information in the HTTP POST Request message body: 
+- RAN NGAP ID and initial AMF name (the information enabling (R)AN to identify the N2 terminating point); 
+- RAN identity, e.g. RAN Node Id, RAN N2 IPv4/v6 address; 
+- Information from RAN, e.g. User Location, RRC Establishment Cause and UE Context Request; 
+- the N1 message; 
+- the UE's SUPI and MM Context; 
+- the Allowed NSSAI together with the corresponding NSI IDs (if network slicing is used and the initial AMF has obtained).
+
+
+
+
+
+
+
+
+					N2InfoNotify
+
+
+
+N2 information could include details about user data sessions, Quality of Service (QoS) requirements, security parameters, or any other relevant data or context exchanged over the N2 interface between network functions.
+
+
+
+The N2InfoNotify service operation is used during the following procedure: 
+
+- Inter NG-RAN node N2 based handover procedure (see 3GPP TS 23.502 [3], clause 4.9.1.3.3, clause 4.23.7.3); 
+
+- Network assisted positioning procedure (see clause 6.11.2 of 3GPP TS 23.273 [42]) 
+
+- AMF planned removal procedure with UDSF deployed (see clause 5.21.2.2.1 of 3GPP TS 23.501 [2]), to forward uplink N2 signalling to a different AMF. 
+
+
+The N2InfoNotify service operation is invoked by AMF, to notify a NF Service Consumer that subscribed N2 information has been received from access network. 
+
+
+>  the SMF might be an NF Service Consumer interested in N2 information related to user sessions it is managing
+
+The AMF shall use HTTP POST method to the N2Info Notification URI provided by the NF Service Consumer via N1N2MessageSubscribe service operation .
+
+
+
+	Consumer          —---------------------------- —----------------------------------------      amf 
+←—---------------1. POST {n2InfoNotifyUri} (N2InformationNotification)-------------
+—---------------2a. 204 No Content------------------------>
+			—---------------2b. 4xx/5xx (ProblemDetails)------------->
+
+
+
+
+1. The AMF shall send a HTTP POST request to the n2InfoNotifyUrl, and the payload body of the POST request shall contain a N2InformationNotification data structure, containing the N2 information that was subscribed by the NF Service Consumer. 
+
+2a. On success, "204 No Content" shall be returned and the payload body of the POST response shall be empty. 
+
+2b. On failure, one of the HTTP status code listed in Table 6.1.5.5.3.1-2 shall be returned. The message body shall contain a ProblemDetails object with "cause" set to one of the corresponding application errors listed in Table 6.1.5.5.3.1-2.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Non-User Equipment
+
+
+
+			
+
+		the term "non-UE" or "non-User Equipment" refers to entities, components, or devices that are not part of the user equipment (UE) category. 
+
+UEs are the mobile devices that connect to the network, such as smartphones, tablets, and IoT (Internet of Things) devices.
+
+"Non-UE" entities can include various elements and components within the network infrastructure:
+
+
+
+Network Functions: Non-UE entities can encompass network functions within the 5G core network, such as the Access and Mobility Management Function (AMF), Session Management Function (SMF), User Plane Function (UPF), Policy Control Function (PCF), Authentication Server Function (AUSF), and others. These functions provide services and control for UEs and the network itself.
+
+
+Base Stations: Base stations, also known as gNodeBs (gNodeB or gNB), are not UEs but are critical components of the radio access network (RAN). They provide radio coverage and connectivity to UEs.
+
+
+
+Backhaul and Transport Equipment: Non-UE components can include the infrastructure that connects various network elements, such as the backhaul network, transport equipment, routers, switches, and optical fiber links.
+
+
+Core Network Components: Elements like the Home Subscriber Server (HSS), Authentication Server (AUSF), Network Slice Selection Function (NSSF), and other core network functions are non-UE components that play important roles in network operations.
+
+
+Network Management and Control Systems: Non-UE entities can include network management systems, controllers, and orchestrators that oversee network operations, allocate resources, and optimize network performance.
+
+
+Policy Enforcement and Authentication Servers: Servers responsible for enforcing network policies, handling authentication and security, and managing Quality of Service (QoS) are non-UE components.
+
+
+Interconnection Points: Points of interconnection with other networks, such as interworking functions for non-3GPP access (e.g., Wi-Fi or fixed-line networks), are non-UE entities.
+
+External Systems and Services: Systems and services outside the 5G network, including external servers, cloud services, and application servers, interact with the network but are not UEs.
+
+
+				
+
+
+NonUeN2MessageTransfer 
+
+
+
+
+
+The NonUeN2MessageTransfer service operation is used by a NF Service Consumer to transfer N2 information to the 5G-AN through the AMF in the following procedures: 
+
+
+- Obtaining non-UE associated network assistance data (See clause 4.13.5.6 in 3GPP TS 23.502 [3]); 
+- Warning Request Transfer procedures (See clause 9A in 3GPP TS 23.041 [20]); 
+- Configuration Transfer procedure (see clause 5.26 of 3GPP TS 23.501 [2]) 
+- RIM Information Transfer procedures (see clause 8.x of 3GPP TS 38.413 [12]). 
+
+
+
+The NF Service Consumer shall invoke the service operation by sending POST to the URI of the "transfer" customer operation on the "Non UE N2Messages Collection" resource (See clause 6.1.3.8.4.2) on the AMF.  
+
+
+
+
+
+
+1. The NF Service Consumer shall invoke the custom operation for non UE associated N2 message transfer by sending a HTTP POST request, and the request body shall carry the N2 information to be transferred.
+
+ 2a. On success, AMF shall respond a "200 OK" status code with N2InformationTransferRspData data structure. 
+
+2b. On failure, one of the HTTP status code listed in Table 6.1.3.8.4.2.2-2shall be returned with the message body containing a N2InformationTransferError structure, including a ProblemDetails attribute with the "cause" attribute set to one of the application errors listed in Table 6.1.3.8.4.2.2-2.
+
+
+
+
+
+
+
+
+
+
+
+
+			We will complete it……………….
+
+
+
+
+
+
+
+
+					AMFStatusChangeSubscribe
+
+				"GUAMI" stands for "Globally Unique AMF Identifier"
+uniquely identify the Access and Mobility Management Function (AMF) within the core network
+
+
+
+
+Subscription Request: When a UE or another network function (e.g., Policy Control Function - PCF) wishes to monitor the status changes of the AMF, it sends a subscription request to the AMF. This request typically includes specific parameters or conditions that define the events or status changes of interest.
+AMF Status Monitoring: The AMF monitors its own operational status and related events. Status changes that may be of interest can include AMF failures, recovery from failures, changes in capacity, or changes in the availability of specific services.
+Status Notification: When the AMF detects a relevant status change or event, it sends notifications to the subscribed UEs or network functions. These notifications provide information about the status change and any relevant details.
+Handling Status Changes: Upon receiving a status notification, the subscribed entities can take appropriate actions based on the information provided. For example, a UE may adjust its behavior or network selection if it receives a notification that the current AMF is experiencing issues.
+
+
+This service operation is used by a NF Service Consumer to subscribe the status change of the AMF. 
+
+The AMFStatusChangeSubscribe service operation is used during the following procedure: 
+
+- AMF planned removal procedure (see 3GPP TS 23.501 [2], clause 5.21.2.2)
+
+
+					Creation of a subscription 
+
+This service operation creates a subscription so a NF Service Consumer can request to be notified when the status of the AMF is changed.
+
+It is executed by creating a new individual resource under the collection resource "subscriptions". 
+The operation shall be invoked by issuing a POST request on the URI of the "subscriptions collection" resource (See clause 6.1.3.6.3.1). 
+
+
+
+
+
+
+
+
+
+1. The NF Service Consumer shall send a POST request to the resource URI representing the "subscriptions" collection resource. 
+
+The request body shall include the data indicating the GUAMI(s) supported by the AMF that the NF Service Consumer is interested in receiving the related status change notification. 
+
+The request body also contains a callback URI, where the NF Service Consumer shall be prepared to receive the actual notification from the AMF (see AMFStatusChangeNotify operation in clause 5.2.2.5.3). 
+
+2a. On success, the AMF shall include a HTTP Location header to provide the location of a newly created resource (subscription) together with the status code 201 indicating the requested resource is created in the response message. 
+
+2b. On failure or redirection, one of the HTTP status code listed in Table 6.1.3.6.3.1-3 shall be returned. For a 4xx/5xx response, the message body containing a ProblemDetails structure with the "cause" attribute set to one of the application error listed in Table 6.1.3.6.3.1-3.
+
+
+
+
+
+				AMFStatusChangeUnSubscribe 
+
+
+
+This service operation removes an existing subscription to notifications. The AMFStatusChangeUnSubscribe service operation is used during the following procedure: 
+
+- AMF planned removal procedure (see 3GPP TS 23.501 [2], clause 5.21.2.2) It is executed by deleting a given resource identified by a "subscriptionId". 
+The operation is invoked by issuing a DELETE request on the URI of the specific " individual subscription" resource (See clause 6.1.3.7.3.1). 
+
+
+
+
+
+
+
+1. The NF Service Consumer shall send a DELETE request to the resource URI representing the individual subscription. The request body shall be empty.
+2a. On success, "204 No Content" shall be returned. The response body shall be empty.
+2b. On failure or redirection, one of the HTTP status code listed in Table 6.1.3.7.3.1-3 shall be returned. For a 4xx/5xx response, the message body shall contain a ProblemDetails structure with the "cause" attribute set to one
+of the application error listed in Table 6.1.3.7.3.1-3.
+
+
+
+
+
+					AMFStatusChangeNotify
+
+
+This service operation notifies each NF Service Consumer that was previously subscribed to receiving notifications of the status change of the AMF (e.g. AMF unavailable). 
+
+The notification is sent to a callback URI that each NF Service Consumer provided during the subscription (see AMFStatusChangeSubscribe operation in 5.2.2.5.1). 
+The AMFStatusChangeNotify service operation is used during the following procedure: 
+- AMF planned removal procedure (see 3GPP TS 23.501 [2], clause 5.21.2.2) The operation is invoked by issuing a POST request to each callback URI of the different NF Service Consumer.
+
+
+
+
+
+
+
+
+1. The AMF shall send a POST request to the callback URI. The request body shall include the GUAMI(s) and the related status change, GUAMI(s) is indicated by the NF Service Consumer during the subscription operation. 
+
+For network deployment without UDSF case, the target AMF Name which is to serve the user of the indicated GUAMI(s) is also included. 
+
+2a. On success, "204 No content" shall be returned by the NF Service Consumer. 
+
+2b. On failure, one of the HTTP status code listed in Table 6.1.5.2.3.1-2 shall be returned. For a 4xx/5xx response, the message body shall contain a ProblemDetails structure with the "cause" attribute set to one of the application error listed in Table 6.1.5.2.3.1-2.
+
+
+
+
+
+
+
+					EBIAssignment
+		EPS (Evolved Packet System) Bearer Identity Assignment
+
+
+
+We will see later….
+
+				Namf_EventExposure Service
+
+
+
+
+
+
+
+
+
+
+
+    AmfEventType_LOCATION_REPORT              AmfEventType = "LOCATION_REPORT"
+    AmfEventType_PRESENCE_IN_AOI_REPORT       AmfEventType = "PRESENCE_IN_AOI_REPORT"
+    AmfEventType_TIMEZONE_REPORT              AmfEventType = "TIMEZONE_REPORT"
+    AmfEventType_ACCESS_TYPE_REPORT           AmfEventType = "ACCESS_TYPE_REPORT"
+    AmfEventType_REGISTRATION_STATE_REPORT    AmfEventType = "REGISTRATION_STATE_REPORT"
+    AmfEventType_CONNECTIVITY_STATE_REPORT    AmfEventType = "CONNECTIVITY_STATE_REPORT"
+    AmfEventType_REACHABILITY_REPORT          AmfEventType = "REACHABILITY_REPORT"
+    AmfEventType_SUBSCRIBED_DATA_REPORT       AmfEventType = "SUBSCRIBED_DATA_REPORT"
+    AmfEventType_COMMUNICATION_FAILURE_REPORT AmfEventType = "COMMUNICATION_FAILURE_REPORT"
+    AmfEventType_UES_IN_AREA_REPORT           AmfEventType = "UES_IN_AREA_REPORT"
+    AmfEventType_SUBSCRIPTION_ID_CHANGE       AmfEventType = "SUBSCRIPTION_ID_CHANGE"
+    AmfEventType_SUBSCRIPTION_ID_ADDITION     AmfEventType = "SUBSCRIPTION_ID_ADDITION"
+)
+
+The AMF may offer this service as a Service Producer to enable an NF to subscribe to event notifications on its own or on behalf of another NF and get notified about an event. 
+The known Service Consumers are NEF, SMF, UDM and NWDAF. 
+
+See also clause 5.34.7 of 3GPP TS 23.501 [2] and clauses 4.15.1, 4.15.3.2, 4.15.4.2 and 5.2.2.3.1 of 3GPP TS 23.502 [3] , clause 6.2.2 in 3GPP TS 23.288 [38]. 
+
+
+The following events are provided by Namf_EventExposure Service: 
+
+Event: Location-Report 
+A NF subscribes to this event to receive the Last Known Location of a UE or a group of UEs or any UE, and Updated Location of any of these UEs when AMF becomes aware of a location change of any of these UEs with the granularity as requested. 
+This event implements the "Location Reporting" event in table 4.15.3.1-1 of 3GPP TS 23.502 [3]. UE Type: One UE, Group of UEs, any UE Report Type: 
+One-Time Report, Continuous Report (See NOTE 1), Periodic Report (See NOTE 1 and 2) Input: UE-ID(s), "ANY_UE", 
+optional filters: TAI, Cell-ID, N3IWF, UE-IP, UDP-PORT, TNAP ID, TWAP ID, Global Line Id Notification; UE-ID, filtered updated location (TAI, Cell-ID for 3GPP access, most recent N3IWF node, UE local IP address and UDP source port number for non-3GPP access, TNAP ID, TWAP ID, Global Line Id). 
+
+NOTE 1: Support of Continuous Report or Periodic Report should be controlled by operator policy. 
+NOTE 2: For Periodic Report, UE Last Known Location is reported if the UE is in CM-IDLE state when the report is being generated. 
+
+
+
+
+
+
+			Event: Presence-In-AOI-Report 
+A NF subscribe to this event to receive the current present state of a UE or a group of UEs or any
+ UE in a specific Area of Interest (AOI), and notification when a specified UE enters or leaves the specified area. 
+The area could be identified by a TA list, an area ID or specific interested area name like "LADN". 
+UE Type: One UE, Group of UEs, any UE 
+Report Type: One-Time Report, Continuously Report Input: UE ID(s), "ANY_UE", Area identifier (a TA list, an area Id or "LADN"), S-NSSAI, NSI ID. 
+Notification: UE-ID(s), Area identifier, Presence Status (IN/OUT/UNKNOWN) 
+
+
+
+
+
+
+
+
+
+
+
+
+Event: Time-Zone-Report 
+A NF subscribes to this event to receive the current time zone of a UE or a group of UEs, and updated time zone of the UE or any UE in the group when AMF becomes aware of a time zone change of the UE. 
+UE Type: One UE, Group of UEs 
+Report Type: One-Time Report, Continuous Report Input: UE ID(s) 
+Notification; UE-ID, most recent time-zone 
+                                                   Event: Access-Type-Report 
+
+A NF subscribes to this event to receive the current access type(s) of a UE or a group of UEs or any UE, and updated access type(s) of any of the UEs when AMF becomes aware of the access type change of any of these UEs.
+ The area could be identified by a TA list, an area ID or specific interested area name like "LADN". 
+UE Type: One UE, Group of UEs, any UE 
+Report Type: One-Time Report, Continuous Report Input: UE ID(s), "ANY_UE", 
+optionally filters: Area identifier (a TA list, an area Id or "LADN") 
+Notification; UE ID, most recent access-types (3GPP, Non-3GPP)
+Event: Registration-State-Report 
+A NF subscribes to this event to receive the current registration state of a UE or a group of UEs or any UE, and report for updated registration state of any of these UEs when AMF becomes aware of a registration state change of any of these UEs. 
+The area could be identified by a TA list, an area ID or specific interested area name like "LADN". 
+UE Type: One UE, Group of UEs, any UE 
+Report Type: One-Time Report, Continuous Report Input: UE ID(s), "ANY_UE",
+ optionally filters: Area identifier (a TA list, an area Id or "LADN")
+ Notification; UE ID, most recent registration state (REGISTERED/DEREGISTERED) with access type.
+Event: Connectivity-State-Report 
+A NF subscribes to this event to receive the current connection management state of a UE or a group of UEs, and report for updated connection management state of a UE or any UE in the group when AMF becomes aware of a connection management state change of the UE. 
+UE Type: One UE, Group of UEs 
+Report Type: One-Time Report, Continuous
+ Report Input: UE ID(s) 
+Notification; UE ID, most recent connection management state (IDLE/CONNECTED) with access type 
+Event: Reachability-Report 
+A NF subscribes to this event for "UE Reachability Status Change" to receive the current reachability state of a UE or a group of UEs in the AMF, and report for updated reachability state of a UE or any UE in the group when AMF becomes aware of a reachability state change of the UEs between REACHABLE, UNREACHABLE, REGULATORY_ONLY. 
+An NF subscribes to this event for "UE Reachable for DL Traffic" to receive reports of a UE or a group of UEs when the UE becomes reachable for sending downlink data. 
+In this case, the event is detected when the UE transitions to CM-CONNECTED mode or when the UE will become reachable for paging, as specified in table 4.15.3.1-1, clauses 4.2.5 and 4.3.3 of 3GPP TS 23.502 [3]. 
+UE Type: One UE, Group of UEs 
+Report Type: One-Time Report, Continuous Report Input: UE ID(s), (optional) Reachability Filter 
+Notification; UE ID, AMF Id, most recent reachability state (REACHABLE/UNREACHABLE/REGULATORY_ONLY). 
+
+Event: Communication-Failure-Report 
+A NF subscribes to this event to receive the Communication failure report of a UE or group of UEs or any UE, when the AMF becomes aware of a RAN or NAS failure event.
+
+
+This event implements the "Communication failure" event in table 4.15.3.1-1 of 3GPP TS 23.502 [3]. 
+UE Type: One UE, Group of UEs, any UE 
+Report Type: One-Time Report, Continuous Report 
+Input: UE ID(s), "ANY_UE", 
+optionally filters: Area identifier (a TA list, an area Id or "LADN") 
+Notification; UE ID, RAN/NAS release code. 
+
+
+
+				Event: UEs-In-Area-Report 
+A NF subscribes to this event to receive the number of UEs in a specific area. A NF may ask AMF for the UEs within the area based on Last Known Location or it may request AMF to actively look for the UEs within the area based on Current Location
+This event implements the "Number of UEs present in a geographical area" event in table 4.15.3.1-1 of 3GPP TS 23.502 [3]. 
+UE Type: any UE Report Type: One-Time Report (See NOTE 3), Continuous Report (See NOTE 4), Periodic Report (See NOTE 4) Input: Area identified in a TA List 
+Notification: Number of UEs in the area
+
+NOTE 3: For an Immediate Report, UE Last Known Location is used to count the UEs within the area. 
+NOTE 4: Support of Continuous Report or Periodic Report should be controlled by operator. 
+
+
+
+
+
+
+Event: Loss-of-Connectivity 
+
+
+
+An NF subscribes to this event to receive the event report of a UE or group of UEs when AMF detects that a target UE is no longer reachable for either signalling or user plane communication.
+
+
+ Such condition is identified when Mobile Reachable timer expires in the AMF (see 3GPP TS 23.501 [2]), when the UE detaches and when AMF deregisters from UDM for an active UE. 
+
+If the UE is already not reachable for either signaling or user plane communication when the event is subscribed, the AMF reports the event directly. 
+
+This event implements the "Loss of Connectivity" event in table 4.15.3.1-1 of 3GPP TS 23.502.
+UE Type: One UE, Group of UEs. 
+Report Type: One-Time Report, Continuous Report 
+Input: UE ID(s) 
+Notification; UE ID.
+ Input: UE ID(s) 
+Notification: UE ID(s) 
+Event: Type-Allocation-Code-Report 
+
+
+
+A NF subscribes to this event to receive the TAC of a UE or a group of UEs or any UE. 
+
+UE Type: One UE, Group of UEs, any 
+UE Report Type: One-Time Report, Continuous Report 
+Input: UE ID(s),"ANY_UE", 
+optionally filters: TAI, Area identifier (a TA list, an area Id or "LADN") 
+Notification: UE ID(s), TAC(s) 
+
+
+
+
+Event: Frequent-Mobility-Registration-Report 
+
+
+
+A NF subscribes to this event to receive the number of mobility registration during a period for a UE or a group of UEs or any UE. 
+UE Type: One UE, Group of UEs, any 
+UE Report Type: One-Time Report, Continuous Report 
+Input: UE ID(s), expiry time, "ANY_UE", optionally 
+filters: Area identifier (a TA list, an area Id or "LADN") 
+Notification: UE ID(s), Frequent Registration
+
+
+
+
+
+					Service Operations 
+
+For the Namf_EventExposure service the following service operations are defined: 
+- Subscribe; 
+- Unsubscribe;
+ - Notify.
+
+ 
+The Service Operation is used by a NF Service Consumer (e.g. NEF) to subscribe to an event(s) for one UE, group of UE(s) or any UE. 
+		
+
+Creation of a subscription  
+
+The Subscribe service operation is invoked by a NF Service Consumer, e.g. NEF, towards the AMF, when it needs to create a subscription to monitor at least one event relevant to the AMF. 
+
+
+The NF Service Consumer may subscribe to multiple events in a subscription. 
+
+A subscription may be associated with one UE, a group of UEs or any UE. 
+The NF
+
+ Service Consumer shall request to create a new subscription by using HTTP method POST with URI of the subscriptions collection, 
+
+see clause 6.2.3.2. The NF Service Consumer shall include the following information in the HTTP message body: 
+- NF ID, indicates the identity of the network function instance initiating the subscription; 
+- Subscription Target, indicates the target(s) to be monitored, as one of the following types:
+- A specific UE, identified with a SUPI, a PEI or a GPSI; 
+- A group of UEs, identified with a group identity; 
+- Any UE, identified by the "anyUE" flag. 
+- Notification URI, indicates the address to deliver the event notifications generated by the subscription; 
+- Notification Correlation ID, indicates the correlation identity to be carried in the event notifications generated by the subscription; 
+- List of events to be subscribed;
+- Event Types per event, as specified in clause 5.3.1. 
+- Reference Id per event, indicates the value of the Reference Id associated with the event to be monitored. 
+
+If provided, the Reference Id shall be included in the reports triggered by the event. 
+
+
+The NF Service Consumer may include the following information in the HTTP message body: 
+
+- Immediate Report Flag per event, indicates an immediate report to be generated with current event status; 
+- Event Trigger, indicates how the events shall be reported (One-time Reporting or Continuously Reporting).
+ - Maximum Number of Reports, defines the maximum number of reports after which the event subscription ceases to exist; 
+- Expiry, defines maximum duration after which the event subscription ceases to exist; 
+- Sampling ratio, defines the random subset of UEs among target UEs, and AMF only report the event(s) related to the selected subset of UEs; 
+- Periodic Report Flag per event, indicates the report to be generated periodically; 
+- Repetition Period, defines the period for periodic reporting; 
+- Event Filter per applicable event, defines further options on how the event shall be reported. 
+
+
+
+
+
+1. The NF Service Consumer shall send a POST request to create a subscription resource in the AMF. 
+The payload body of the POST request shall contain a representation of the individual subscription resource to be created. 
+The request may contain an expiry time, suggested by the NF Service Consumer as a hint, representing the time upto which the subscription is desired to be kept active and the time after which the subscribed event(s) shall stop generating report. 
+2a. On success, the request is accepted, the AMF shall include a HTTP Location header to provide the location of a newly created resource (subscription) together with the status code 201 indicating the requested resource is created in the response message. 
+
+If the NF Service Consumer has included the immediateFlag with value as "true" in the event subscription, the AMF shall include the current status of the events subscribed, if available (e.g. last known location information is included if the subscribed event is LOCATION_REPORT).
+
+If the NF Service Consumer has set the event reporting option as ONE_TIME and if the AMF has included the current status of the events subscribed in the response, then the AMF shall not do any subsequent event notification for the events given in the AmfCreateEventSubscription parameter.
+
+The response, based on operator policy and taking into account the expiry time included in the request, may contain the expiry time, as determined by the AMF, after which the subscription becomes invalid. Once the subscription expires, if the NF Service Consumer wants to keep receiving notifications, it shall create a new subscription in the AMF. The AMF shall not provide the same expiry time for many subscriptions in order to avoid all of them expiring and recreating the subscription at the same time. If the expiry time is not included in the response, the NF Service Consumer shall consider the subscription to be valid without an expiry time. If the sampling ratio ("sampRatio") attribute is included in the subscription, the AMF shall select a random subset of UEs among target UEs according to the sampling ratio and only report the event(s) related to the selected subset of UEs. 
+2b. On failure or redirection, one of the HTTP status code listed in Table 6.2.3.2.3.1-3 shall be returned. For a 4xx/5xx response, the message body shall contain a ProblemDetails structure with the "cause" attribute set to one of the application error listed in Table 6.2.3.2.3.1-3. 
+
+
+
+
+					Modification of a subscription
+
+
+The Subscribe service operation is invoked by a NF Service Consumer, e.g. NEF, towards the AMF, when it needs to modify an existing subscription previously created by itself at the AMF.
+
+The NF Service Consumer shall modify the subscription by using HTTP method PATCH with the URI of the individual subscription resource (see clause 6.2.3.3) to be modified.  
+
+
+
+
+
+1. The NF Service Consumer shall send a PATCH request to modify a subscription resource in the AMF.
+The modification may be for the events subscribed or for updating the event options. 
+
+2a. On success, the request is accepted, the AMF shall return the representation of the modified subscription resource or its sub-resource together with the status code 200 OK. 
+When the PATCH request is for modifying the expiry attribute of the options IE of the subscription, then the AMF based on operator policies and taking into account the expiry time included in the request, shall include an expiry time, after which the subscription becomes invalid. 
+Once the subscription expires, if the NF Service Consumer wants to keep receiving notifications, it shall create a new subscription in the AMF, as specified in clause 5.3.2.2.2. The AMF shall not provide the same expiry time for many subscriptions in order to avoid all of them expiring and recreating the subscription at the same time. 
+
+2b. On failure or redirection, one of the HTTP status code listed in Table 6.2.3.3.3.1-3 shall be returned. For a 4xx/5xx response, the message body shall contain a ProblemDetails structure with the "cause" attribute set to one of the application error listed in Table 6.2.3.3.3.1-3. 
+
+
+
+Unsubscribe
+
+
+
+
+The Unsubscribe service operation is invoked by a NF Service Consumer, e.g. NEF, towards the AMF, to remove an existing subscription previously created by itself at the AMF. 
+The NF Service Consumer shall unsubscribe to the subscription by using HTTP method DELETE with the URI of the individual subscription resource (see clause 6.2.3.3) to be deleted. 
+
+
+
+
+
+1. The NF Service Consumer shall send a DELETE request to delete an existing subscription resource in the AMF. 2a. On success, the request is accepted, the AMF shall reply with the status code 204 indicating the resource identified by subscription ID is successfully deleted in the response message. 
+2b. On failure or redirection, one of the HTTP status code listed in Table 6.2.3.3.3.2-3 shall be returned. For a 4xx/5xx response, the message body shall contain a ProblemDetails structure with the "cause" attribute set to one of the application error listed in Table 6.2.3.3.3.2-3. 
+
+
+
+							Notify
+
+
+
+The Notify service operation is invoked by the AMF, to send a notification, towards the notification URI, when certain event included in the subscription has taken place. 
+
+The AMF shall use the HTTP method POST, using the notification URI received in the subscription creation as specified in clause 5.3.2.2.2, including e.g. the subscription ID, Event ID(s) for which event has happened, notification correlation ID provided by the NF service consumer at the time of event subscription, to send a notification. 
+See Figure 5.3.2.4.1-1. Additionally, the Notify service operation shall also be invoked by the AMF, when there is a change of AMF during UE mobility procedures and if the subscription Id changes (i.e. Registration procedures and Handover procedures). 
+
+
+
+1. The AMF shall send a POST request to send a notification. 
+2a. On success, "204 No content" shall be returned by the NF Service Consumer. 
+2b. On failure, the appropriate HTTP status code (e.g. "403 Forbidden") indicating the error shall be returned and appropriate additional error information should be returned. 
+
+
+
+
+
+
+						 Namf_MT Service
+ (access and mobility management function for mobile termination)
+
+Mobile Terminating (MT) refers to a message being sent to a mobile handset.
+
+
+Namf_MT service allows a NF to request information related to capabilities to send MT signalling or data to a target UE.
+The following are the key functionalities of this NF service 
+
+- paging UE if UE is in IDLE state and respond other NF after the UE enters CM-CONNECTED state. 
+- response to the requester NF if UE is in CONNECTED state. 
+- providing the terminating domain selection information for IMS voice to the consumer NF. 
+
+
+
+Service Operations
+
+	For the Namf_MT Service the following service operations are defined: 
+- EnableUEReachability
+- ProvideDomainSelectionInfo
+
+
+
+
+
+EnableUEReachability:
+
+The EnableUEReachability service operation is used in the following procedure: 
+- MT SMS over NAS in CM-IDLE state (see 3GPP TS 23.502 [3], clause 4.13.3.6), or 
+in CM-CONNECTED state (see 3GPP TS 23.502 [3], clause 4.13.3.7). 
+
+- UPF anchored Mobile Terminated Data Transport in Control Plane CIoT 5GS Optimisation (see clause 4.24.2 of 3GPP TS 23.502 [3]). 
+
+
+The EnableUEReachability service operation shall be invoked by the NF Service Consumer (e.g. SMSF, SMF) to enable the reachability of the UE. 
+The NF Service Consumer shall invoke the service by using the HTTP method PUT, towards the URI of a "ueReachInd" resource as specified in clause 6.3.3.2. See also figure 5.4.2.2.1-1. 
+
