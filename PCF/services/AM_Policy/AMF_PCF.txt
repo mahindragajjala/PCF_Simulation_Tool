@@ -1,0 +1,1079 @@
+CLIENT
+
+func AMPolicyControlCreate(ue *amf_context.AmfUe, anType models.AccessType) (*models.ProblemDetails, error) {
+    //-------------------------------------------------------------------------------------------------------
+    func NewConfiguration() *Configuration {  // GET CONFIG
+        cfg := &Configuration{
+            basePath:      "https://example.com/npcf-am-policy-control/v1",
+            url:           "{apiRoot}/npcf-am-policy-control/v1",
+            defaultHeader: make(map[string]string),
+            userAgent:     "OpenAPI-Generator/1.0.0/go",
+        }
+        return cfgCLIENT
+
+func AMPolicyControlCreate(ue *amf_context.AmfUe, anType models.AccessType) (*models.ProblemDetails, error) {
+    //-------------------------------------------------------------------------------------------------------
+    func NewConfiguration() *Configuration {  // GET CONFIG
+        cfg := &Configuration{
+            basePath:      "https://example.com/npcf-am-policy-control/v1",
+            url:           "{apiRoot}/npcf-am-policy-control/v1",
+            defaultHeader: make(map[string]string),
+            userAgent:     "OpenAPI-Generator/1.0.0/go",
+        }
+        return cfg
+    }
+
+    func (c *Configuration) SetBasePath(apiRoot string) { // SET BASEPATH
+        url := c.url
+   
+        // Replace apiRoot
+        url = strings.Replace(url, "{"+"apiRoot"+"}", apiRoot, -1)
+   
+        c.basePath = url
+    }
+
+    // NewAPIClient creates a new API client. Requires a userAgent string describing your application.
+    // optionally a custom http.Client to allow for advanced features such as caching.
+    func NewAPIClient(cfg *Configuration) *APIClient { //TAKING SERVICES
+        if cfg.httpClient == nil {
+            cfg.httpClient = http.DefaultClient
+            cfg.httpClient.Transport = &http2.Transport{
+                TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+            }
+        }
+
+        c := &APIClient{}
+        c.cfg = cfg
+        c.common.client = c
+
+        // API Services
+        c.DefaultApi = (*DefaultApiService)(&c.common)
+        c.DefaultCallbackApi = (*DefaultCallbackApiService)(&c.common)
+
+        return c
+    }
+    //-------------------------------------------------------------------------------------------------------
+    configuration := Npcf_AMPolicy.NewConfiguration()
+    //logger.ConsumerLog.Infoln("configuration",configuration)
+    configuration.SetBasePath(ue.PcfUri)
+    client := Npcf_AMPolicy.NewAPIClient(configuration)
+    //logger.ConsumerLog.Infoln("client",client)
+
+    amfSelf := amf_context.AMF_Self()
+    //logger.ConsumerLog.Infoln("amfSelf",amfSelf)
+
+    /*
+        Mcc: ue.PlmnId.Mcc,
+                Mnc: ue.PlmnId.Mnc,
+    */
+    //ue.RanUe[models.AccessType__3_GPP_ACCESS].Location.NrLocation.Tai;
+
+    policyAssociationRequest := models.PolicyAssociationRequest{
+        NotificationUri: amfSelf.GetIPv4Uri() + "/namf-callback/v1/am-policy/",
+        Supi:            ue.Supi,
+        Pei:             ue.Pei,
+        Gpsi:            ue.Gpsi,
+        AccessType:      anType,
+        ServingPlmn: &models.NetworkId{
+            Mcc: ue.RanUe[models.AccessType__3_GPP_ACCESS].Location.NrLocation.Tai.PlmnId.Mcc,
+            Mnc: ue.RanUe[models.AccessType__3_GPP_ACCESS].Location.NrLocation.Tai.PlmnId.Mnc,
+        },
+        Guami: &amfSelf.ServedGuamiList[0],
+    }
+    // logger.ConsumerLog.Infoln("amfSelf",amfSelf)
+
+    if ue.AccessAndMobilitySubscriptionData != nil {
+        policyAssociationRequest.Rfsp = ue.AccessAndMobilitySubscriptionData.RfspIndex
+        //logger.ConsumerLog.Infoln("policyAssociationRequest.Rfsp",policyAssociationRequest.Rfsp)
+    }
+
+
+    amfSelf.PCPCF.Request()
+    //------------------------------------------------------------------------------
+    PCPCF                               SBIPegCount
+    type SBIPegCount struct {
+        Name                        string
+   
+        RequestCount                int64
+        LastRequestCount            int64
+        RequestMu                   sync.Mutex  
+   
+        ResponseCount               int64
+        LastResponseCount           int64
+        ResponseMu                  sync.Mutex
+       
+        ResponseTime                float64
+        LastResponseTime            float64
+       
+        ErrorCount                  int64
+        LastErrorCount              int64  
+        ErrorMu                     sync.Mutex
+       
+        TimeoutCount                int64
+        LastTimeoutCount            int64
+        TimeoutMu                   sync.Mutex
+       
+        NotFoundCount               int64
+        LastNotFoundCount           int64
+        NotFoundMu                  sync.Mutex
+    }
+    func ( pc * SBIPegCount) Request() {
+        pc.RequestCount++
+    }
+    //------------------------------------------------------------------------------
+   
+    // hemanth added Time stamp  -starting
+    start_time := time.Now()
+    res, httpResp, localErr := client.DefaultApi.PoliciesPost(context.Background(), policyAssociationRequest)
+    //------------------------------------------------------------------------------
+   
+func (a *DefaultApiService) PoliciesPost(ctx context.Context, policyAssociationRequest models.PolicyAssociationRequest) (models.PolicyAssociation, *http.Response, error) {
+    var (
+        localVarHTTPMethod   = strings.ToUpper("Post")
+        localVarPostBody     interface{}
+        localVarFormFileName string
+        localVarFileName     string
+        localVarFileBytes    []byte
+        localVarReturnValue  models.PolicyAssociation
+    )
+
+    // create path and map variables
+    localVarPath := a.client.cfg.BasePath() + "/policies"
+
+    localVarHeaderParams := make(map[string]string)
+    localVarQueryParams := url.Values{}
+    localVarFormParams := url.Values{}
+
+    localVarHTTPContentTypes := []string{"application/json"}
+
+    localVarHeaderParams["Content-Type"] = localVarHTTPContentTypes[0] // use the first content type specified in 'consumes'
+
+    // to determine the Accept header
+    localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
+
+    // set Accept header
+    localVarHTTPHeaderAccept := openapi.SelectHeaderAccept(localVarHTTPHeaderAccepts)
+    if localVarHTTPHeaderAccept != "" {
+        localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+    }
+
+    // body params
+    localVarPostBody = &policyAssociationRequest
+
+    r, err := openapi.PrepareRequest(ctx, a.client.cfg, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+    if err != nil {
+        return localVarReturnValue, nil, err
+    }
+
+    localVarHTTPResponse, err := openapi.CallAPI(a.client.cfg, r)
+    if err != nil || localVarHTTPResponse == nil {
+        return localVarReturnValue, localVarHTTPResponse, err
+    }
+
+    localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+    localVarHTTPResponse.Body.Close()
+    if err != nil {
+        return localVarReturnValue, localVarHTTPResponse, err
+    }
+
+    apiError := openapi.GenericOpenAPIError{
+        RawBody:     localVarBody,
+        ErrorStatus: localVarHTTPResponse.Status,
+    }
+
+    switch localVarHTTPResponse.StatusCode {
+    case 201:
+        err = openapi.Deserialize(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+        if err != nil {
+            apiError.ErrorStatus = err.Error()
+        }
+        return localVarReturnValue, localVarHTTPResponse, nil
+    case 400:
+        var v models.ProblemDetails
+        err = openapi.Deserialize(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+        if err != nil {
+            apiError.ErrorStatus = err.Error()
+            return localVarReturnValue, localVarHTTPResponse, apiError
+        }
+        apiError.ErrorModel = v
+        return localVarReturnValue, localVarHTTPResponse, apiError
+    case 401:
+        var v models.ProblemDetails
+        err = openapi.Deserialize(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+        if err != nil {
+            apiError.ErrorStatus = err.Error()
+            return localVarReturnValue, localVarHTTPResponse, apiError
+        }
+        apiError.ErrorModel = v
+        return localVarReturnValue, localVarHTTPResponse, apiError
+    case 403:
+        var v models.ProblemDetails
+        err = openapi.Deserialize(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+        if err != nil {
+            apiError.ErrorStatus = err.Error()
+            return localVarReturnValue, localVarHTTPResponse, apiError
+        }
+        apiError.ErrorModel = v
+   
+    //------------------------------------------------------------------------------
+
+    elapsed_time := time.Now().Sub(start_time)
+
+    if elapsed_time.Seconds() > 1 {
+        logger.CommLog.Infoln("client.DefaultApi.PoliciesPost time_taken =", elapsed_time.Seconds()) //AMF-NGAPID
+    }
+
+    if localErr == nil {
+        locationHeader := httpResp.Header.Get("Location")
+        //logger.ConsumerLog.Infoln("locationHeader",locationHeader)
+        logger.ConsumerLog.Debugf("location header: %+v", locationHeader)
+        ue.AmPolicyUri = locationHeader
+
+        re := regexp.MustCompile("/policies/.*")
+        match := re.FindStringSubmatch(locationHeader)
+        //logger.ConsumerLog.Infoln("re",re)
+        ue.PolicyAssociationId = match[0][10:]
+        ue.AmPolicyAssociation = &res
+
+        if res.Triggers != nil {
+            for _, trigger := range res.Triggers {
+                if trigger == models.RequestTrigger_LOC_CH {
+                    ue.RequestTriggerLocationChange = true
+                    //logger.ConsumerLog.Infoln("trigger",trigger)
+                }
+                //if trigger == models.RequestTrigger_PRA_CH {
+                // TODO: Presence Reporting Area handling (TS 23.503 6.1.2.5, TS 23.501 5.6.11)
+                //}
+            }
+        }
+        amfSelf.PCPCF.Response(elapsed_time.Seconds())
+        //logger.ConsumerLog.Debugf("UE AM Policy Association ID: %s", ue.PolicyAssociationId)
+        //logger.ConsumerLog.Debugf("AmPolicyAssociation: %+v", ue.AmPolicyAssociation)
+        //logger.ConsumerLog.Infoln("In AMPolicyControlCreate Function")
+    } else if httpResp != nil {
+        if httpResp.Status != localErr.Error() {
+            //logger.ConsumerLog.Infoln("httpResp",httpResp.Status)
+            amfSelf.PCPCF.IncrementErrorOrTimeout(localErr)
+            return nil, localErr
+        }
+
+        amfSelf.PCPCF.IncrementErrorOrTimeout(localErr)
+        problem := localErr.(openapi.GenericOpenAPIError).Model().(models.ProblemDetails)
+        //logger.ConsumerLog.Infoln("problem",problem)
+        return &problem, nil
+    } else {
+        amfSelf.PCPCF.Error()
+        return nil, openapi.ReportError("pcf server no response")
+        //logger.ConsumerLog.Infoln("pcf server no response:")
+    }
+    return nil, nil
+}
+
+
+//SERVER
+
+
+{
+    "HTTPPoliciesPost",
+    strings.ToUpper("Post"),
+    "/policies",
+    HTTPPoliciesPost,
+},
+
+
+// HTTPPoliciesPost -
+func HTTPPoliciesPost(c *gin.Context) {
+    prometheus.AmpolicyDataPost()
+    var policyAssociationRequest models.PolicyAssociationRequest
+    //---------------------------------------------------------------------
+    // GetRawData return stream data.
+        func (c *Context) GetRawData() ([]byte, error) {
+            return ioutil.ReadAll(c.Request.Body)
+        }
+    //---------------------------------------------------------------------
+    requestBody, err := c.GetRawData()
+    if err != nil {
+        problemDetail := models.ProblemDetails{
+            Title:  "System failure",
+            Status: http.StatusInternalServerError,
+            Detail: err.Error(),
+            Cause:  "SYSTEM_FAILURE",
+        }
+        logger.AMpolicylog.Errorf("HTTPPoliciesPost Get Request Body error: %+v", err)
+        c.JSON(http.StatusInternalServerError, problemDetail)
+        return
+    }
+    //----------------------------------------------------------------------------------
+    //INPUTS FROM AMF
+    type PolicyAssociationRequest struct {
+        //NotificationUri: amfSelf.GetIPv4Uri() + "/namf-callback/v1/am-policy/",
+        /*
+        The Notification URI is used in 5G networks to receive notifications of events from various network functions (NFs) such as the Policy Control Function (PCF) and Session Management Function (SMF).
+        */
+        NotificationUri string `json:"notificationUri" yaml:"notificationUri" bson:"notificationUri" mapstructure:"NotificationUri"`
+        // Alternate or backup IPv4 Address(es) where to send Notifications.
+        AltNotifIpv4Addrs []string `json:"altNotifIpv4Addrs,omitempty" yaml:"altNotifIpv4Addrs" bson:"altNotifIpv4Addrs" mapstructure:"AltNotifIpv4Addrs"`
+        // Alternate or backup IPv6 Address(es) where to send Notifications.
+        AltNotifIpv6Addrs []string                `json:"altNotifIpv6Addrs,omitempty" yaml:"altNotifIpv6Addrs" bson:"altNotifIpv6Addrs" mapstructure:"AltNotifIpv6Addrs"`
+        Supi              string                  `json:"supi" yaml:"supi" bson:"supi" mapstructure:"Supi"`
+        Gpsi              string                  `json:"gpsi,omitempty" yaml:"gpsi" bson:"gpsi" mapstructure:"Gpsi"`
+        AccessType        AccessType              `json:"accessType,omitempty" yaml:"accessType" bson:"accessType" mapstructure:"AccessType"`
+        Pei               string                  `json:"pei,omitempty" yaml:"pei" bson:"pei" mapstructure:"Pei"`
+        UserLoc           *UserLocation           `json:"userLoc,omitempty" yaml:"userLoc" bson:"userLoc" mapstructure:"UserLoc"`
+        TimeZone          string                  `json:"timeZone,omitempty" yaml:"timeZone" bson:"timeZone" mapstructure:"TimeZone"`
+        ServingPlmn       *NetworkId              `json:"servingPlmn,omitempty" yaml:"servingPlmn" bson:"servingPlmn" mapstructure:"ServingPlmn"`
+        RatType           RatType                 `json:"ratType,omitempty" yaml:"ratType" bson:"ratType" mapstructure:"RatType"`
+        GroupIds          []string                `json:"groupIds,omitempty" yaml:"groupIds" bson:"groupIds" mapstructure:"GroupIds"`
+        ServAreaRes       *ServiceAreaRestriction `json:"servAreaRes,omitempty" yaml:"servAreaRes" bson:"servAreaRes" mapstructure:"ServAreaRes"`
+        Rfsp              int32                   `json:"rfsp,omitempty" yaml:"rfsp" bson:"rfsp" mapstructure:"Rfsp"`
+        Guami             *Guami                  `json:"guami,omitempty" yaml:"guami" bson:"guami" mapstructure:"Guami"`
+        // If the NF service consumer is an AMF, it should provide the name of a service produced by the AMF that makes use of information received within the Npcf_AMPolicyControl_UpdateNotify service operation.
+        ServiveName string     `json:"serviveName,omitempty" yaml:"serviveName" bson:"serviveName" mapstructure:"ServiveName"`
+        TraceReq    *TraceData `json:"traceReq,omitempty" yaml:"traceReq" bson:"traceReq" mapstructure:"TraceReq"`
+        SuppFeat    string     `json:"suppFeat" yaml:"suppFeat" bson:"suppFeat" mapstructure:"SuppFeat"`
+    }
+    //--------------------------------------------------------------------------------------    
+    err = openapi.Deserialize(&policyAssociationRequest, requestBody, "application/json")
+    if err != nil {
+        problemDetail := "[Request Body] " + err.Error()
+        rsp := models.ProblemDetails{
+            Title:  "Malformed request syntax",
+            Status: http.StatusBadRequest,
+            Detail: problemDetail,
+        }
+        logger.AMpolicylog.Errorln("HTTPPoliciesPost Deserialize Error Occured", problemDetail)
+        c.JSON(http.StatusBadRequest, rsp)
+        return
+    }
+
+    if policyAssociationRequest.Supi == "" || policyAssociationRequest.NotificationUri == "" {
+        rsp := util.GetProblemDetail("Miss Mandotory IE", util.ERROR_REQUEST_PARAMETERS)
+        logger.HandlerLog.Errorln("HTTPPoliciesPost Missing Mandotory parameters", rsp.Detail)
+        c.JSON(int(rsp.Status), rsp)
+        return
+    }
+
+    req := http_wrapper.NewRequest(c.Request, policyAssociationRequest)
+    req.Params["polAssoId"], _ = c.Params.Get("polAssoId")
+
+    rsp := producer.HandlePostPolicies(req)
+
+    for key, val := range rsp.Header {
+        c.Header(key, val[0])
+    }
+
+    responseBody, err := openapi.Serialize(rsp.Body, "application/json")
+    if err != nil {
+        logger.AMpolicylog.Errorln("HTTPPoliciesPost Serialize Error", err)
+        problemDetails := models.ProblemDetails{
+            Status: http.StatusInternalServerError,
+            Cause:  "SYSTEM_FAILURE",
+            Detail: err.Error(),
+        }
+        c.JSON(http.StatusInternalServerError, problemDetails)
+    } else {
+        c.Data(rsp.Status, "application/json", responseBody)
+    }
+}
+// Create AM Policy
+func HandlePostPolicies(request *http_wrapper.Request) *http_wrapper.Response {
+
+    logger.AppLog.Infoln("HandlePostPolicies-----request---->", request)
+
+    polAssoId := request.Params["polAssoId"]
+
+    logger.AMpolicylog.Infoln("Handle AM Policy Create Request with policyID", polAssoId)
+
+    policyAssociationRequest := request.Body.(models.PolicyAssociationRequest)
+
+
+    response, locationHeader, problemDetails := PostPoliciesProcedure(polAssoId, policyAssociationRequest)
+
+    logger.AMpolicylog.Infof("polAssoId:%+v policyAssociationRequest:%+v", polAssoId, policyAssociationRequest)
+
+    headers := http.Header{
+        "Location": {locationHeader},
+    }
+
+    if response != nil {
+        return http_wrapper.NewResponse(http.StatusCreated, headers, response)
+    } else if problemDetails != nil {
+        logger.AMpolicylog.Errorln("HandlePostPolicies Post Policies Procedure Error with problemDetails.Status=", int(problemDetails.Status)) //changed
+        return http_wrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
+    }
+    problemDetails = &models.ProblemDetails{
+        Status: http.StatusForbidden,
+        Cause:  "UNSPECIFIED",
+    }
+    logger.AMpolicylog.Infoln("HandlePostPolicies Post Policies Procedure Error with problemDetails.Status=", int(problemDetails.Status)) //changed
+    return http_wrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
+}
+
+func PostPoliciesProcedure(polAssoId string,
+    policyAssociationRequest models.PolicyAssociationRequest) (*models.PolicyAssociation, string, *models.ProblemDetails) {
+    //logger.AMpolicylog.Infoln("polAssoId",polAssoId)
+        //-------------------------------------------------
+       
+        type PolicyAssociation struct {
+            Request *PolicyAssociationRequest `json:"request,omitempty" yaml:"request" bson:"request" mapstructure:"Request"`
+            // Request Triggers that the PCF subscribes. Only values \"LOC_CH\" and \"PRA_CH\" are permitted.
+            Triggers    []RequestTrigger        `json:"triggers,omitempty" yaml:"triggers" bson:"triggers" mapstructure:"Triggers"`
+            ServAreaRes *ServiceAreaRestriction `json:"servAreaRes,omitempty" yaml:"servAreaRes" bson:"servAreaRes" mapstructure:"ServAreaRes"`
+            Rfsp        int32                   `json:"rfsp,omitempty" yaml:"rfsp" bson:"rfsp" mapstructure:"Rfsp"`
+            Pras        map[string]PresenceInfo `json:"pras,omitempty" yaml:"pras" bson:"pras" mapstructure:"Pras"`
+            SuppFeat    string                  `json:"suppFeat" yaml:"suppFeat" bson:"suppFeat" mapstructure:"SuppFeat"`
+        }
+        //---------------------------------------------------
+    var response models.PolicyAssociation //response
+    pcfSelf := pcf_context.PCF_Self() //Taking the PCFContext data.
+   
+    var ue *pcf_context.UeContext
+    if val, ok := pcfSelf.UePool.Load(policyAssociationRequest.Supi); ok {
+        ue = val.(*pcf_context.UeContext)
+    }
+    if ue == nil {
+        if newUe, err := pcfSelf.NewPCFUe(policyAssociationRequest.Supi); err != nil {
+            // supi format dose not match "imsi-..."
+            problemDetail := util.GetProblemDetail("Supi Format Error", util.ERROR_REQUEST_PARAMETERS)
+            logger.AMpolicylog.Errorln(err.Error())
+            return nil, "", &problemDetail
+        } else {
+            ue = newUe
+        }
+    }
+    udrUri := getUdrUri(ue)
+    //logger.AMpolicylog.Infoln("udrUri",udrUri)
+    if udrUri == "" {
+        // Can't find any UDR support this Ue
+        pcfSelf.UePool.Delete(ue.Supi)
+        problemDetail := util.GetProblemDetail("Ue is not supported in PCF", util.USER_UNKNOWN)
+        logger.AMpolicylog.Errorf("PostPoliciesProcedure Ue[%s] is not supported in PCF", ue.Supi)
+        return nil, "", &problemDetail
+    }
+    ue.UdrUri = udrUri
+    //logger.AMpolicylog.Infoln("ue.UdrUri",ue.UdrUri)
+    response.Request = deepcopy.Copy(&policyAssociationRequest).(*models.PolicyAssociationRequest)
+    assolId := fmt.Sprintf("%s-%d", ue.Supi, ue.PolAssociationIDGenerator)
+    amPolicy := ue.AMPolicyData[assolId]
+
+    if amPolicy == nil || amPolicy.AmPolicyData == nil {
+        client := util.GetNudrClient(udrUri)
+        var response *http.Response
+
+        //Bhavani added Time stamp_starting
+        start_time := time.Now()
+        amData, response, err := client.DefaultApi.PolicyDataUesUeIdAmDataGet(context.Background(), ue.Supi)
+        elapsed_time := time.Now().Sub(start_time)
+        logger.AMpolicylog.Infoln("client.DefaultApi.PolicyDataUesUeIdAmDataGet time_taken =", elapsed_time.Seconds())
+        //ending
+        if err != nil || response == nil || response.StatusCode != http.StatusOK {
+            problemDetail := util.GetProblemDetail("Can't find UE AM Policy Data in UDR", util.USER_UNKNOWN)
+            logger.AMpolicylog.Errorf("PostPoliciesProcedure Can't find UE[%s] AM Policy Data in UDR", ue.Supi)
+            return nil, "", &problemDetail
+        }
+        defer func() {
+            if rspCloseErr := response.Body.Close(); rspCloseErr != nil {
+                logger.AMpolicylog.Errorf("PolicyDataUesUeIdAmDataGet response cannot close: %+v", rspCloseErr)
+            }
+        }()
+        if amPolicy == nil {
+            amPolicy = ue.NewUeAMPolicyData(assolId, policyAssociationRequest)
+        }
+        amPolicy.AmPolicyData = &amData
+    }
+
+    // TODO: according to PCF Policy to determine ServAreaRes, Rfsp, SuppFeat
+    // amPolicy.ServAreaRes =
+    // amPolicy.Rfsp =
+    var requestSuppFeat openapi.SupportedFeature
+    if suppFeat, err := openapi.NewSupportedFeature(policyAssociationRequest.SuppFeat); err != nil {
+        logger.AMpolicylog.Warnln(err)
+    } else {
+        requestSuppFeat = suppFeat
+    }
+    amPolicy.SuppFeat = pcfSelf.PcfSuppFeats[models.
+        ServiceName_NPCF_AM_POLICY_CONTROL].NegotiateWith(
+        requestSuppFeat).String()
+    if amPolicy.Rfsp != 0 {
+        response.Rfsp = amPolicy.Rfsp
+    }
+    response.SuppFeat = amPolicy.SuppFeat
+    //logger.AMpolicylog.Infoln("response.SuppFeat",response.SuppFeat)
+    // TODO: add Reports
+    // rsp.Triggers
+    // rsp.Pras
+    ue.PolAssociationIDGenerator++
+    // Create location header for update, delete, get
+    locationHeader := util.GetResourceUri(models.ServiceName_NPCF_AM_POLICY_CONTROL, assolId)
+    logger.AMpolicylog.Tracef("AMPolicy association Id[%s] Create", assolId)
+
+    // if consumer is AMF then subscribe this AMF Status
+    if policyAssociationRequest.Guami != nil {
+        // if policyAssociationRequest.Guami has been subscribed, then no need to subscribe again
+        needSubscribe := true
+        pcfSelf.AMFStatusSubsData.Range(func(key, value interface{}) bool {
+            data := value.(pcf_context.AMFStatusSubscriptionData)
+            for _, guami := range data.GuamiList {
+                if reflect.DeepEqual(guami, *policyAssociationRequest.Guami) {
+                    needSubscribe = false
+                    break
+                }
+            }
+            // if no need to subscribe => stop iteration
+            return needSubscribe
+        })
+
+        if needSubscribe {
+            logger.AMpolicylog.Debugf("Subscribe AMF status change[GUAMI: %+v]", *policyAssociationRequest.Guami)
+            amfUri := consumer.SendNFIntancesAMF(pcfSelf.NrfUri, *policyAssociationRequest.Guami, models.ServiceName_NAMF_COMM)
+            if amfUri != "" {
+                //Bhavani added Time stamp_starting
+                start_time := time.Now()
+                problemDetails, err := consumer.AmfStatusChangeSubscribe(amfUri, []models.Guami{*policyAssociationRequest.Guami})
+                elapsed_time := time.Now().Sub(start_time)
+                logger.AMpolicylog.Infoln("consumer.AmfStatusChangeSubscribe time_taken =", elapsed_time.Seconds())
+                //ending
+                if err != nil {
+                    logger.AMpolicylog.Errorf("PostPoliciesProcedure Subscribe AMF status change error[%+v]", err)
+                } else if problemDetails != nil {
+                    logger.AMpolicylog.Errorf("PostPoliciesProcedure Subscribe AMF status change failed[%+v]", problemDetails)
+                } else {
+                    amPolicy.Guami = policyAssociationRequest.Guami
+                }
+            }
+        } else {
+            logger.AMpolicylog.Debugf("AMF status[GUAMI: %+v] has been subscribed", *policyAssociationRequest.Guami)
+        }
+    }
+    //logger.AMpolicylog.Infoln("response",response,"locationHeader",locationHeader)
+    return &response, locationHeader, nil
+}
+
+    }
+
+    func (c *Configuration) SetBasePath(apiRoot string) { // SET BASEPATH
+        url := c.url
+   
+        // Replace apiRoot
+        url = strings.Replace(url, "{"+"apiRoot"+"}", apiRoot, -1)
+   
+        c.basePath = url
+    }
+
+    // NewAPIClient creates a new API client. Requires a userAgent string describing your application.
+    // optionally a custom http.Client to allow for advanced features such as caching.
+    func NewAPIClient(cfg *Configuration) *APIClient { //TAKING SERVICES
+        if cfg.httpClient == nil {
+            cfg.httpClient = http.DefaultClient
+            cfg.httpClient.Transport = &http2.Transport{
+                TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+            }
+        }
+
+        c := &APIClient{}
+        c.cfg = cfg
+        c.common.client = c
+
+        // API Services
+        c.DefaultApi = (*DefaultApiService)(&c.common)
+        c.DefaultCallbackApi = (*DefaultCallbackApiService)(&c.common)
+
+        return c
+    }
+    //-------------------------------------------------------------------------------------------------------
+    configuration := Npcf_AMPolicy.NewConfiguration()
+    //logger.ConsumerLog.Infoln("configuration",configuration)
+    configuration.SetBasePath(ue.PcfUri)
+    client := Npcf_AMPolicy.NewAPIClient(configuration)
+    //logger.ConsumerLog.Infoln("client",client)
+
+    amfSelf := amf_context.AMF_Self()
+    //logger.ConsumerLog.Infoln("amfSelf",amfSelf)
+
+    /*
+        Mcc: ue.PlmnId.Mcc,
+                Mnc: ue.PlmnId.Mnc,
+    */
+    //ue.RanUe[models.AccessType__3_GPP_ACCESS].Location.NrLocation.Tai;
+
+    policyAssociationRequest := models.PolicyAssociationRequest{
+        NotificationUri: amfSelf.GetIPv4Uri() + "/namf-callback/v1/am-policy/",
+        Supi:            ue.Supi,
+        Pei:             ue.Pei,
+        Gpsi:            ue.Gpsi,
+        AccessType:      anType,
+        ServingPlmn: &models.NetworkId{
+            Mcc: ue.RanUe[models.AccessType__3_GPP_ACCESS].Location.NrLocation.Tai.PlmnId.Mcc,
+            Mnc: ue.RanUe[models.AccessType__3_GPP_ACCESS].Location.NrLocation.Tai.PlmnId.Mnc,
+        },
+        Guami: &amfSelf.ServedGuamiList[0],
+    }
+    // logger.ConsumerLog.Infoln("amfSelf",amfSelf)
+
+    if ue.AccessAndMobilitySubscriptionData != nil {
+        policyAssociationRequest.Rfsp = ue.AccessAndMobilitySubscriptionData.RfspIndex
+        //logger.ConsumerLog.Infoln("policyAssociationRequest.Rfsp",policyAssociationRequest.Rfsp)
+    }
+
+
+    amfSelf.PCPCF.Request()
+    //------------------------------------------------------------------------------
+    PCPCF                               SBIPegCount
+    type SBIPegCount struct {
+        Name                        string
+   
+        RequestCount                int64
+        LastRequestCount            int64
+        RequestMu                   sync.Mutex  
+   
+        ResponseCount               int64
+        LastResponseCount           int64
+        ResponseMu                  sync.Mutex
+       
+        ResponseTime                float64
+        LastResponseTime            float64
+       
+        ErrorCount                  int64
+        LastErrorCount              int64  
+        ErrorMu                     sync.Mutex
+       
+        TimeoutCount                int64
+        LastTimeoutCount            int64
+        TimeoutMu                   sync.Mutex
+       
+        NotFoundCount               int64
+        LastNotFoundCount           int64
+        NotFoundMu                  sync.Mutex
+    }
+    func ( pc * SBIPegCount) Request() {
+        pc.RequestCount++
+    }
+    //------------------------------------------------------------------------------
+   
+    // hemanth added Time stamp  -starting
+    start_time := time.Now()
+    res, httpResp, localErr := client.DefaultApi.PoliciesPost(context.Background(), policyAssociationRequest)
+    //------------------------------------------------------------------------------
+   
+func (a *DefaultApiService) PoliciesPost(ctx context.Context, policyAssociationRequest models.PolicyAssociationRequest) (models.PolicyAssociation, *http.Response, error) {
+    var (
+        localVarHTTPMethod   = strings.ToUpper("Post")
+        localVarPostBody     interface{}
+        localVarFormFileName string
+        localVarFileName     string
+        localVarFileBytes    []byte
+        localVarReturnValue  models.PolicyAssociation
+    )
+
+    // create path and map variables
+    localVarPath := a.client.cfg.BasePath() + "/policies"
+
+    localVarHeaderParams := make(map[string]string)
+    localVarQueryParams := url.Values{}
+    localVarFormParams := url.Values{}
+
+    localVarHTTPContentTypes := []string{"application/json"}
+
+    localVarHeaderParams["Content-Type"] = localVarHTTPContentTypes[0] // use the first content type specified in 'consumes'
+
+    // to determine the Accept header
+    localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
+
+    // set Accept header
+    localVarHTTPHeaderAccept := openapi.SelectHeaderAccept(localVarHTTPHeaderAccepts)
+    if localVarHTTPHeaderAccept != "" {
+        localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+    }
+
+    // body params
+    localVarPostBody = &policyAssociationRequest
+
+    r, err := openapi.PrepareRequest(ctx, a.client.cfg, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+    if err != nil {
+        return localVarReturnValue, nil, err
+    }
+
+    localVarHTTPResponse, err := openapi.CallAPI(a.client.cfg, r)
+    if err != nil || localVarHTTPResponse == nil {
+        return localVarReturnValue, localVarHTTPResponse, err
+    }
+
+    localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+    localVarHTTPResponse.Body.Close()
+    if err != nil {
+        return localVarReturnValue, localVarHTTPResponse, err
+    }
+
+    apiError := openapi.GenericOpenAPIError{
+        RawBody:     localVarBody,
+        ErrorStatus: localVarHTTPResponse.Status,
+    }
+
+    switch localVarHTTPResponse.StatusCode {
+    case 201:
+        err = openapi.Deserialize(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+        if err != nil {
+            apiError.ErrorStatus = err.Error()
+        }
+        return localVarReturnValue, localVarHTTPResponse, nil
+    case 400:
+        var v models.ProblemDetails
+        err = openapi.Deserialize(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+        if err != nil {
+            apiError.ErrorStatus = err.Error()
+            return localVarReturnValue, localVarHTTPResponse, apiError
+        }
+        apiError.ErrorModel = v
+        return localVarReturnValue, localVarHTTPResponse, apiError
+    case 401:
+        var v models.ProblemDetails
+        err = openapi.Deserialize(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+        if err != nil {
+            apiError.ErrorStatus = err.Error()
+            return localVarReturnValue, localVarHTTPResponse, apiError
+        }
+        apiError.ErrorModel = v
+        return localVarReturnValue, localVarHTTPResponse, apiError
+    case 403:
+        var v models.ProblemDetails
+        err = openapi.Deserialize(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+        if err != nil {
+            apiError.ErrorStatus = err.Error()
+            return localVarReturnValue, localVarHTTPResponse, apiError
+        }
+        apiError.ErrorModel = v
+   
+    //------------------------------------------------------------------------------
+
+    elapsed_time := time.Now().Sub(start_time)
+
+    if elapsed_time.Seconds() > 1 {
+        logger.CommLog.Infoln("client.DefaultApi.PoliciesPost time_taken =", elapsed_time.Seconds()) //AMF-NGAPID
+    }
+
+    if localErr == nil {
+        locationHeader := httpResp.Header.Get("Location")
+        //logger.ConsumerLog.Infoln("locationHeader",locationHeader)
+        logger.ConsumerLog.Debugf("location header: %+v", locationHeader)
+        ue.AmPolicyUri = locationHeader
+
+        re := regexp.MustCompile("/policies/.*")
+        match := re.FindStringSubmatch(locationHeader)
+        //logger.ConsumerLog.Infoln("re",re)
+        ue.PolicyAssociationId = match[0][10:]
+        ue.AmPolicyAssociation = &res
+
+        if res.Triggers != nil {
+            for _, trigger := range res.Triggers {
+                if trigger == models.RequestTrigger_LOC_CH {
+                    ue.RequestTriggerLocationChange = true
+                    //logger.ConsumerLog.Infoln("trigger",trigger)
+                }
+                //if trigger == models.RequestTrigger_PRA_CH {
+                // TODO: Presence Reporting Area handling (TS 23.503 6.1.2.5, TS 23.501 5.6.11)
+                //}
+            }
+        }
+        amfSelf.PCPCF.Response(elapsed_time.Seconds())
+        //logger.ConsumerLog.Debugf("UE AM Policy Association ID: %s", ue.PolicyAssociationId)
+        //logger.ConsumerLog.Debugf("AmPolicyAssociation: %+v", ue.AmPolicyAssociation)
+        //logger.ConsumerLog.Infoln("In AMPolicyControlCreate Function")
+    } else if httpResp != nil {
+        if httpResp.Status != localErr.Error() {
+            //logger.ConsumerLog.Infoln("httpResp",httpResp.Status)
+            amfSelf.PCPCF.IncrementErrorOrTimeout(localErr)
+            return nil, localErr
+        }
+
+        amfSelf.PCPCF.IncrementErrorOrTimeout(localErr)
+        problem := localErr.(openapi.GenericOpenAPIError).Model().(models.ProblemDetails)
+        //logger.ConsumerLog.Infoln("problem",problem)
+        return &problem, nil
+    } else {
+        amfSelf.PCPCF.Error()
+        return nil, openapi.ReportError("pcf server no response")
+        //logger.ConsumerLog.Infoln("pcf server no response:")
+    }
+    return nil, nil
+}
+
+
+//SERVER
+
+
+{
+    "HTTPPoliciesPost",
+    strings.ToUpper("Post"),
+    "/policies",
+    HTTPPoliciesPost,
+},
+
+
+// HTTPPoliciesPost -
+func HTTPPoliciesPost(c *gin.Context) {
+    prometheus.AmpolicyDataPost()
+    var policyAssociationRequest models.PolicyAssociationRequest
+    //---------------------------------------------------------------------
+    // GetRawData return stream data.
+        func (c *Context) GetRawData() ([]byte, error) {
+            return ioutil.ReadAll(c.Request.Body)
+        }
+    //---------------------------------------------------------------------
+    requestBody, err := c.GetRawData()
+    if err != nil {
+        problemDetail := models.ProblemDetails{
+            Title:  "System failure",
+            Status: http.StatusInternalServerError,
+            Detail: err.Error(),
+            Cause:  "SYSTEM_FAILURE",
+        }
+        logger.AMpolicylog.Errorf("HTTPPoliciesPost Get Request Body error: %+v", err)
+        c.JSON(http.StatusInternalServerError, problemDetail)
+        return
+    }
+    //----------------------------------------------------------------------------------
+    //INPUTS FROM AMF
+    type PolicyAssociationRequest struct {
+        //NotificationUri: amfSelf.GetIPv4Uri() + "/namf-callback/v1/am-policy/",
+        /*
+        The Notification URI is used in 5G networks to receive notifications of events from various network functions (NFs) such as the Policy Control Function (PCF) and Session Management Function (SMF).
+        */
+        NotificationUri string `json:"notificationUri" yaml:"notificationUri" bson:"notificationUri" mapstructure:"NotificationUri"`
+        // Alternate or backup IPv4 Address(es) where to send Notifications.
+        AltNotifIpv4Addrs []string `json:"altNotifIpv4Addrs,omitempty" yaml:"altNotifIpv4Addrs" bson:"altNotifIpv4Addrs" mapstructure:"AltNotifIpv4Addrs"`
+        // Alternate or backup IPv6 Address(es) where to send Notifications.
+        AltNotifIpv6Addrs []string                `json:"altNotifIpv6Addrs,omitempty" yaml:"altNotifIpv6Addrs" bson:"altNotifIpv6Addrs" mapstructure:"AltNotifIpv6Addrs"`
+        Supi              string                  `json:"supi" yaml:"supi" bson:"supi" mapstructure:"Supi"`
+        Gpsi              string                  `json:"gpsi,omitempty" yaml:"gpsi" bson:"gpsi" mapstructure:"Gpsi"`
+        AccessType        AccessType              `json:"accessType,omitempty" yaml:"accessType" bson:"accessType" mapstructure:"AccessType"`
+        Pei               string                  `json:"pei,omitempty" yaml:"pei" bson:"pei" mapstructure:"Pei"`
+        UserLoc           *UserLocation           `json:"userLoc,omitempty" yaml:"userLoc" bson:"userLoc" mapstructure:"UserLoc"`
+        TimeZone          string                  `json:"timeZone,omitempty" yaml:"timeZone" bson:"timeZone" mapstructure:"TimeZone"`
+        ServingPlmn       *NetworkId              `json:"servingPlmn,omitempty" yaml:"servingPlmn" bson:"servingPlmn" mapstructure:"ServingPlmn"`
+        RatType           RatType                 `json:"ratType,omitempty" yaml:"ratType" bson:"ratType" mapstructure:"RatType"`
+        GroupIds          []string                `json:"groupIds,omitempty" yaml:"groupIds" bson:"groupIds" mapstructure:"GroupIds"`
+        ServAreaRes       *ServiceAreaRestriction `json:"servAreaRes,omitempty" yaml:"servAreaRes" bson:"servAreaRes" mapstructure:"ServAreaRes"`
+        Rfsp              int32                   `json:"rfsp,omitempty" yaml:"rfsp" bson:"rfsp" mapstructure:"Rfsp"`
+        Guami             *Guami                  `json:"guami,omitempty" yaml:"guami" bson:"guami" mapstructure:"Guami"`
+        // If the NF service consumer is an AMF, it should provide the name of a service produced by the AMF that makes use of information received within the Npcf_AMPolicyControl_UpdateNotify service operation.
+        ServiveName string     `json:"serviveName,omitempty" yaml:"serviveName" bson:"serviveName" mapstructure:"ServiveName"`
+        TraceReq    *TraceData `json:"traceReq,omitempty" yaml:"traceReq" bson:"traceReq" mapstructure:"TraceReq"`
+        SuppFeat    string     `json:"suppFeat" yaml:"suppFeat" bson:"suppFeat" mapstructure:"SuppFeat"`
+    }
+    //--------------------------------------------------------------------------------------    
+    err = openapi.Deserialize(&policyAssociationRequest, requestBody, "application/json")
+    if err != nil {
+        problemDetail := "[Request Body] " + err.Error()
+        rsp := models.ProblemDetails{
+            Title:  "Malformed request syntax",
+            Status: http.StatusBadRequest,
+            Detail: problemDetail,
+        }
+        logger.AMpolicylog.Errorln("HTTPPoliciesPost Deserialize Error Occured", problemDetail)
+        c.JSON(http.StatusBadRequest, rsp)
+        return
+    }
+
+    if policyAssociationRequest.Supi == "" || policyAssociationRequest.NotificationUri == "" {
+        rsp := util.GetProblemDetail("Miss Mandotory IE", util.ERROR_REQUEST_PARAMETERS)
+        logger.HandlerLog.Errorln("HTTPPoliciesPost Missing Mandotory parameters", rsp.Detail)
+        c.JSON(int(rsp.Status), rsp)
+        return
+    }
+
+    req := http_wrapper.NewRequest(c.Request, policyAssociationRequest)
+    req.Params["polAssoId"], _ = c.Params.Get("polAssoId")
+
+    rsp := producer.HandlePostPolicies(req)
+
+    for key, val := range rsp.Header {
+        c.Header(key, val[0])
+    }
+
+    responseBody, err := openapi.Serialize(rsp.Body, "application/json")
+    if err != nil {
+        logger.AMpolicylog.Errorln("HTTPPoliciesPost Serialize Error", err)
+        problemDetails := models.ProblemDetails{
+            Status: http.StatusInternalServerError,
+            Cause:  "SYSTEM_FAILURE",
+            Detail: err.Error(),
+        }
+        c.JSON(http.StatusInternalServerError, problemDetails)
+    } else {
+        c.Data(rsp.Status, "application/json", responseBody)
+    }
+}
+// Create AM Policy
+func HandlePostPolicies(request *http_wrapper.Request) *http_wrapper.Response {
+
+    logger.AppLog.Infoln("HandlePostPolicies-----request---->", request)
+
+    polAssoId := request.Params["polAssoId"]
+
+    logger.AMpolicylog.Infoln("Handle AM Policy Create Request with policyID", polAssoId)
+
+    policyAssociationRequest := request.Body.(models.PolicyAssociationRequest)
+
+
+    response, locationHeader, problemDetails := PostPoliciesProcedure(polAssoId, policyAssociationRequest)
+
+    logger.AMpolicylog.Infof("polAssoId:%+v policyAssociationRequest:%+v", polAssoId, policyAssociationRequest)
+
+    headers := http.Header{
+        "Location": {locationHeader},
+    }
+
+    if response != nil {
+        return http_wrapper.NewResponse(http.StatusCreated, headers, response)
+    } else if problemDetails != nil {
+        logger.AMpolicylog.Errorln("HandlePostPolicies Post Policies Procedure Error with problemDetails.Status=", int(problemDetails.Status)) //changed
+        return http_wrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
+    }
+    problemDetails = &models.ProblemDetails{
+        Status: http.StatusForbidden,
+        Cause:  "UNSPECIFIED",
+    }
+    logger.AMpolicylog.Infoln("HandlePostPolicies Post Policies Procedure Error with problemDetails.Status=", int(problemDetails.Status)) //changed
+    return http_wrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
+}
+
+func PostPoliciesProcedure(polAssoId string,
+    policyAssociationRequest models.PolicyAssociationRequest) (*models.PolicyAssociation, string, *models.ProblemDetails) {
+    //logger.AMpolicylog.Infoln("polAssoId",polAssoId)
+        //-------------------------------------------------
+       
+        type PolicyAssociation struct {
+            Request *PolicyAssociationRequest `json:"request,omitempty" yaml:"request" bson:"request" mapstructure:"Request"`
+            // Request Triggers that the PCF subscribes. Only values \"LOC_CH\" and \"PRA_CH\" are permitted.
+            Triggers    []RequestTrigger        `json:"triggers,omitempty" yaml:"triggers" bson:"triggers" mapstructure:"Triggers"`
+            ServAreaRes *ServiceAreaRestriction `json:"servAreaRes,omitempty" yaml:"servAreaRes" bson:"servAreaRes" mapstructure:"ServAreaRes"`
+            Rfsp        int32                   `json:"rfsp,omitempty" yaml:"rfsp" bson:"rfsp" mapstructure:"Rfsp"`
+            Pras        map[string]PresenceInfo `json:"pras,omitempty" yaml:"pras" bson:"pras" mapstructure:"Pras"`
+            SuppFeat    string                  `json:"suppFeat" yaml:"suppFeat" bson:"suppFeat" mapstructure:"SuppFeat"`
+        }
+        //---------------------------------------------------
+    var response models.PolicyAssociation //response
+    pcfSelf := pcf_context.PCF_Self() //Taking the PCFContext data.
+   
+    var ue *pcf_context.UeContext
+    if val, ok := pcfSelf.UePool.Load(policyAssociationRequest.Supi); ok {
+        ue = val.(*pcf_context.UeContext)
+    }
+    if ue == nil {
+        if newUe, err := pcfSelf.NewPCFUe(policyAssociationRequest.Supi); err != nil {
+            // supi format dose not match "imsi-..."
+            problemDetail := util.GetProblemDetail("Supi Format Error", util.ERROR_REQUEST_PARAMETERS)
+            logger.AMpolicylog.Errorln(err.Error())
+            return nil, "", &problemDetail
+        } else {
+            ue = newUe
+        }
+    }
+    udrUri := getUdrUri(ue)
+    //logger.AMpolicylog.Infoln("udrUri",udrUri)
+    if udrUri == "" {
+        // Can't find any UDR support this Ue
+        pcfSelf.UePool.Delete(ue.Supi)
+        problemDetail := util.GetProblemDetail("Ue is not supported in PCF", util.USER_UNKNOWN)
+        logger.AMpolicylog.Errorf("PostPoliciesProcedure Ue[%s] is not supported in PCF", ue.Supi)
+        return nil, "", &problemDetail
+    }
+    ue.UdrUri = udrUri
+    //logger.AMpolicylog.Infoln("ue.UdrUri",ue.UdrUri)
+    response.Request = deepcopy.Copy(&policyAssociationRequest).(*models.PolicyAssociationRequest)
+    assolId := fmt.Sprintf("%s-%d", ue.Supi, ue.PolAssociationIDGenerator)
+    amPolicy := ue.AMPolicyData[assolId]
+
+    if amPolicy == nil || amPolicy.AmPolicyData == nil {
+        client := util.GetNudrClient(udrUri)
+        var response *http.Response
+
+        //Bhavani added Time stamp_starting
+        start_time := time.Now()
+        amData, response, err := client.DefaultApi.PolicyDataUesUeIdAmDataGet(context.Background(), ue.Supi)
+        elapsed_time := time.Now().Sub(start_time)
+        logger.AMpolicylog.Infoln("client.DefaultApi.PolicyDataUesUeIdAmDataGet time_taken =", elapsed_time.Seconds())
+        //ending
+        if err != nil || response == nil || response.StatusCode != http.StatusOK {
+            problemDetail := util.GetProblemDetail("Can't find UE AM Policy Data in UDR", util.USER_UNKNOWN)
+            logger.AMpolicylog.Errorf("PostPoliciesProcedure Can't find UE[%s] AM Policy Data in UDR", ue.Supi)
+            return nil, "", &problemDetail
+        }
+        defer func() {
+            if rspCloseErr := response.Body.Close(); rspCloseErr != nil {
+                logger.AMpolicylog.Errorf("PolicyDataUesUeIdAmDataGet response cannot close: %+v", rspCloseErr)
+            }
+        }()
+        if amPolicy == nil {
+            amPolicy = ue.NewUeAMPolicyData(assolId, policyAssociationRequest)
+        }
+        amPolicy.AmPolicyData = &amData
+    }
+
+    // TODO: according to PCF Policy to determine ServAreaRes, Rfsp, SuppFeat
+    // amPolicy.ServAreaRes =
+    // amPolicy.Rfsp =
+    var requestSuppFeat openapi.SupportedFeature
+    if suppFeat, err := openapi.NewSupportedFeature(policyAssociationRequest.SuppFeat); err != nil {
+        logger.AMpolicylog.Warnln(err)
+    } else {
+        requestSuppFeat = suppFeat
+    }
+    amPolicy.SuppFeat = pcfSelf.PcfSuppFeats[models.
+        ServiceName_NPCF_AM_POLICY_CONTROL].NegotiateWith(
+        requestSuppFeat).String()
+    if amPolicy.Rfsp != 0 {
+        response.Rfsp = amPolicy.Rfsp
+    }
+    response.SuppFeat = amPolicy.SuppFeat
+    //logger.AMpolicylog.Infoln("response.SuppFeat",response.SuppFeat)
+    // TODO: add Reports
+    // rsp.Triggers
+    // rsp.Pras
+    ue.PolAssociationIDGenerator++
+    // Create location header for update, delete, get
+    locationHeader := util.GetResourceUri(models.ServiceName_NPCF_AM_POLICY_CONTROL, assolId)
+    logger.AMpolicylog.Tracef("AMPolicy association Id[%s] Create", assolId)
+
+    // if consumer is AMF then subscribe this AMF Status
+    if policyAssociationRequest.Guami != nil {
+        // if policyAssociationRequest.Guami has been subscribed, then no need to subscribe again
+        needSubscribe := true
+        pcfSelf.AMFStatusSubsData.Range(func(key, value interface{}) bool {
+            data := value.(pcf_context.AMFStatusSubscriptionData)
+            for _, guami := range data.GuamiList {
+                if reflect.DeepEqual(guami, *policyAssociationRequest.Guami) {
+                    needSubscribe = false
+                    break
+                }
+            }
+            // if no need to subscribe => stop iteration
+            return needSubscribe
+        })
+
+        if needSubscribe {
+            logger.AMpolicylog.Debugf("Subscribe AMF status change[GUAMI: %+v]", *policyAssociationRequest.Guami)
+            amfUri := consumer.SendNFIntancesAMF(pcfSelf.NrfUri, *policyAssociationRequest.Guami, models.ServiceName_NAMF_COMM)
+            if amfUri != "" {
+                //Bhavani added Time stamp_starting
+                start_time := time.Now()
+                problemDetails, err := consumer.AmfStatusChangeSubscribe(amfUri, []models.Guami{*policyAssociationRequest.Guami})
+                elapsed_time := time.Now().Sub(start_time)
+                logger.AMpolicylog.Infoln("consumer.AmfStatusChangeSubscribe time_taken =", elapsed_time.Seconds())
+                //ending
+                if err != nil {
+                    logger.AMpolicylog.Errorf("PostPoliciesProcedure Subscribe AMF status change error[%+v]", err)
+                } else if problemDetails != nil {
+                    logger.AMpolicylog.Errorf("PostPoliciesProcedure Subscribe AMF status change failed[%+v]", problemDetails)
+                } else {
+                    amPolicy.Guami = policyAssociationRequest.Guami
+                }
+            }
+        } else {
+            logger.AMpolicylog.Debugf("AMF status[GUAMI: %+v] has been subscribed", *policyAssociationRequest.Guami)
+        }
+    }
+    //logger.AMpolicylog.Infoln("response",response,"locationHeader",locationHeader)
+    return &response, locationHeader, nil
+}
+
